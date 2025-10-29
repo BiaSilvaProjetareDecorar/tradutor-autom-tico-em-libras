@@ -6,7 +6,7 @@
 <body>
 
     <h1>Tradutor Instantâneo para Libras</h1>
-    <p>Este é um protótipo com recursos gratuitos. Clique em "Iniciar Microfone" e fale. O avatar do VLibras fará a tradução adaptada.</p>
+    <p>Este é um protótipo com recursos gratuitos. Clique em "Iniciar Microfone" e fale. O avatar do VLibras fará a tradução adaptada. **Aguarde o avatar do VLibras aparecer antes de usar o microfone.**</p>
 
     <div id="saida-texto" style="border: 1px solid #ccc; padding: 10px; min-height: 50px; margin-bottom: 20px;">
         **Seu texto transcrito e a tradução adaptada aparecerão aqui!**
@@ -18,7 +18,7 @@
             <div class="vw-plugin-top-wrapper"></div>
         </div>
     </div>
-    <script src="https://vlibras.gov.br/app/a006c000003Nf07/plugin.js"></script>
+    <script src="https://vlibras.gov.br/app/a006c000003Nf07/plugin.js" async defer></script>
 
 
     <button id="iniciar" style="font-size: 18px; padding: 10px; background-color: green; color: white;">Iniciar Microfone</button>
@@ -71,7 +71,7 @@
                     saidaTexto.innerText = `Original: ${finalTranscript}\n(Tradução adaptada: "${textoCorrigido}")`;
                     
                     // JOGA O TEXTO CORRIGIDO NO VLIBRAS
-                    // CORREÇÃO: Usamos o objeto global window.VLibras para garantir a comunicação
+                    // Implementação corrigida para usar o objeto global correto do VLibras (window.VLibras)
                     if (window.VLibras && window.VLibras.widget && window.VLibras.widget.translate) {
                         window.VLibras.widget.translate(textoCorrigido);
                         saidaTexto.innerText += `\n(Tradução enviada ao VLibras!)`;
@@ -83,6 +83,12 @@
 
             // Botão Iniciar
             iniciarBtn.addEventListener('click', () => {
+                // Checagem de segurança: só inicia se o VLibras estiver carregado
+                if (!window.VLibras) {
+                    saidaTexto.innerText = "ERRO: Aguarde o avatar do VLibras carregar antes de iniciar o microfone.";
+                    return;
+                }
+                
                 finalTranscript = ''; // Limpa antes de começar
                 recognition.start();
                 iniciarBtn.style.backgroundColor = 'orange';
