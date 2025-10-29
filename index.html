@@ -1,16 +1,34 @@
-// Substitua o bloco de script atual (linhas 50 até o final do script) por este:
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tradutor Automático para Libras - Protótipo Gratuito</title>
+</head>
+<body>
+
+    <h1>Tradutor Instantâneo para Libras</h1>
+    <p>Este é um protótipo com recursos gratuitos. A tradução adaptada abrirá em uma nova aba, garantindo a visualização do avatar do VLibras.</p>
+
+    <div id="saida-texto" style="border: 1px solid #ccc; padding: 10px; min-height: 50px; margin-bottom: 20px;">
+        Clique em "Iniciar Microfone". A tradução adaptada abrirá em uma nova aba.
+    </div>
+
+    <div vw class="enabled">
+        <div vw-access-button class="active"></div>
+        <div vw-plugin-wrapper>
+            <div class="vw-plugin-top-wrapper"></div>
+        </div>
+    </div>
+    <script src="https://vlibras.gov.br/app/a006c000003Nf07/plugin.js" async defer></script>
+
+
+    <button id="iniciar" style="font-size: 18px; padding: 10px; background-color: green; color: white;">Iniciar Microfone</button>
+    <button id="parar" style="font-size: 18px; padding: 10px; background-color: red; color: white;">Parar</button>
+    
     <script id="codigo-asr">
         const saidaTexto = document.getElementById('saida-texto');
         const iniciarBtn = document.getElementById('iniciar');
         const pararBtn = document.getElementById('parar');
 
-        // Habilita os botões e remove a lógica de espera que travou
-        iniciarBtn.disabled = false;
-        pararBtn.disabled = false;
-        iniciarBtn.style.backgroundColor = 'green';
-        iniciarBtn.innerText = 'Iniciar Microfone';
-        saidaTexto.innerHTML = 'Clique em "Iniciar Microfone". A tradução adaptada abrirá em uma nova aba.';
-        
         // Verifica se a API de Reconhecimento de Fala está disponível
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         
@@ -94,26 +112,46 @@
             // *** FASE 3: O CÉREBRO - FUNÇÃO DE REGRAS DE ADAPTAÇÃO PARA LIBRAS (O foco principal) ***
             // ----------------------------------------------------------------
             function aplicarRegrasDeLibras(textoOriginal) {
-                // ... (Regras de adaptação continuam as mesmas - este é o seu principal foco agora) ...
+                // 1. Limpeza Inicial
                 let textoCorrigido = textoOriginal.toLowerCase();
+
+                // 2. CORREÇÃO E SUBSTITUIÇÃO LINGUÍSTICA (Priorizando a Glosa da Libras)
                 textoCorrigido = textoCorrigido.replace(/\btá bom\b/g, 'ok');
                 textoCorrigido = textoCorrigido.replace(/\ba gente\b/g, 'nós');
                 textoCorrigido = textoCorrigido.replace(/\bmeu\b/g, 'eu');
                 textoCorrigido = textoCorrigido.replace(/\bminha\b/g, 'eu');
+                
+                // Correção de erros de transcrição comuns
                 textoCorrigido = textoCorrigido.replace(/\bsapo\b/g, 'saber'); 
                 textoCorrigido = textoCorrigido.replace(/\bque a\b/g, ''); 
                 
+                // **NOVAS REGRAS: Simplificação de Verbos Conjugados (Glosa)**
+                textoCorrigido = textoCorrigido.replace(/\bcomprei\b/g, 'comprar'); 
+                textoCorrigido = textoCorrigido.replace(/\bfui\b/g, 'ir');         
+                
+                // 3. REGRAS DE TEMPO/NEGAÇÃO (Para ordenar como na Libras)
+                
+                // Mover Advérbios de Tempo para o INÍCIO
                 if (textoCorrigido.includes('amanhã')) {
                     textoCorrigido = textoCorrigido.replace('amanhã', '').trim();
                     textoCorrigido = 'amanhã ' + textoCorrigido;
                 }
+                if (textoCorrigido.includes('ontem')) {
+                    textoCorrigido = textoCorrigido.replace('ontem', '').trim();
+                    textoCorrigido = 'ontem ' + textoCorrigido;
+                }
                 
+                // Mover a negação 'não' para o FINAL da frase
                 if (textoCorrigido.includes(' não ')) {
                     textoCorrigido = textoCorrigido.replace(' não ', ' ');
                     textoCorrigido = textoCorrigido.trim() + ' NÃO';
                 }
 
+                // 4. REMOÇÃO FINAL
+                // Artigos/Preposições desnecessárias
                 textoCorrigido = textoCorrigido.replace(/\b(o|a|os|as|um|uma|uns|umas|de|da|do|e|em)\b/g, '').trim();
+
+                // Formatação final
                 textoCorrigido = textoCorrigido.replace(/[.?]/g, '');
                 textoCorrigido = textoCorrigido.replace(/\s+/g, ' ').trim();
 
@@ -121,3 +159,6 @@
             }
         }
     </script>
+    
+</body>
+</html>
