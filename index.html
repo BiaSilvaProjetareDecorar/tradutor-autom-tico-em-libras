@@ -24,10 +24,127 @@
     <button id="iniciar" style="font-size: 18px; padding: 10px; background-color: green; color: white;">Iniciar Microfone</button>
     <button id="parar" style="font-size: 18px; padding: 10px; background-color: red; color: white;">Parar</button>
     
-    <script id="codigo-asr">
-        // ESTA SEÇÃO SERÁ COMPLEMENTADA COM O CÓDIGO GRATUITO DE RECONHECIMENTO DE FALA
-        // E AS REGRAS DE ADAPTAÇÃO PARA LIBRAS.
+    <script id="codigo-asr">const saidaTexto = document.getElementById('saida-texto');
+        const iniciarBtn = document.getElementById('iniciar');
+        const pararBtn = document.getElementById('parar');
+        const vlibrasPlugin = window.VlibrasPlugin;
+
+        // Verifica se a API de Reconhecimento de Fala está disponível no navegador
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (!SpeechRecognition) {
+            saidaTexto.innerText = "ERRO: O seu navegador não suporta o Reconhecimento de Fala. Tente usar o Google Chrome.";
+        } else {
+            const recognition = new SpeechRecognition();
+            // Define o idioma para Português do Brasil
+            recognition.lang = 'pt-BR';
+            // Configura para capturar resultados provisórios (em tempo real)
+            recognition.interimResults = true;
+            
+            let finalTranscript = '';
+
+            // Lógica ao receber um resultado de fala
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                
+                // Exibe o texto em tempo real (provavelmente final + interim)
+                saidaTexto.innerText = finalTranscript + interimTranscript;
+            };
+
+            // Lógica ao terminar de capturar um bloco de fala
+            recognition.onend = () => {
+                iniciarBtn.style.backgroundColor = 'green';
+                iniciarBtn.innerText = 'Iniciar Microfone';
+                
+                if (finalTranscript.trim().length > 0) {
+                    // *** PONTO CRÍTICO: CHAMA A FUNÇÃO DE TRADUÇÃO AQUI ***
+                    const textoCorrigido = aplicarRegrasDeLibras(finalTranscript.trim());
+                    
+                    // JOGA O TEXTO CORRIGIDO NO VLIBRAS
+                    if (vlibrasPlugin && vlibrasPlugin.translate) {
+                        vlibrasPlugin.translate(textoCorrigido);
+                    } else {
+                        // Se o VLibras não carregou, exibe a saída.
+                        saidaTexto.innerText += `\n(VLibras não carregado, tradução: "${textoCorrigido}")`;
+                    }
+                }
+            };
+
+            // Botão Iniciar
+            iniciarBtn.addEventListener('click', () => {
+                finalTranscript = ''; // Limpa antes de começar
+                recognition.start();
+                iniciarBtn.style.backgroundColor = 'orange';
+                iniciarBtn.innerText = 'Gravando...';
+            });
+
+            // Botão Parar
+            pararBtn.addEventListener('click', () => {
+                recognition.stop();
+                iniciarBtn.style.backgroundColor = 'green';
+                iniciarBtn.innerText = 'Iniciar Microfone';
+            });
+            
+            // Tratamento de erro
+            recognition.onerror = (event) => {
+                console.error(event.error);
+                if (event.error === 'not-allowed') {
+                     saidaTexto.innerText = "Erro: Acesso ao microfone negado. Por favor, permita o uso do microfone nas configurações do navegador.";
+                } else {
+                    saidaTexto.innerText = `Erro na transcrição: ${event.error}`;
+                }
+                iniciarBtn.style.backgroundColor = 'green';
+                iniciarBtn.innerText = 'Iniciar Microfone';
+            };
+            
+            // ----------------------------------------------------------------
+            // *** FASE 3: O CÉREBRO - FUNÇÃO DE REGRAS DE ADAPTAÇÃO PARA LIBRAS ***
+            // ----------------------------------------------------------------
+            function aplicarRegrasDeLibras(textoOriginal) {
+                // O texto do ASR vem sem pontuação e, em geral, em letras minúsculas.
+                let textoCorrigido = textoOriginal.toLowerCase();
+                
+                // 1. REGRAS DE SUBSTITUIÇÃO SIMPLES (VOCÊ PODE ADICIONAR MAIS AQUI)
+                // Exemplo: 'tá bom' vira 'ok' (sinal mais direto)
+                textoCorrigido = textoCorrigido.replace(/\btá bom\b/g, 'ok');
+                
+                // Exemplo: 'a gente' vira 'nós' (mais direto na Libras)
+                textoCorrigido = textoCorrigido.replace(/\ba gente\b/g, 'nós');
+                
+                // Exemplo: 'não' + verbo é uma construção comum. Substituir por 'NÃO' no final (parcialmente)
+                // A negação é muito complexa, mas a substituição ajuda no entendimento.
+                textoCorrigido = textoCorrigido.replace(/\bnão (vou|quero|gosto)\b/g, 'NÃO ');
+                
+                // 2. REGRAS DE REORDENAÇÃO (MAIS DIFÍCIL SEM ESTRUTURA, MAS ESSENCIAL)
+                
+                // Exemplo muito simplificado de SVO T (Sujeito, Verbo, Objeto, Tempo)
+                // O "amanhã" deve ir no início para Libras (TEMPO)
+                if (textoCorrigido.includes('amanhã')) {
+                    textoCorrigido = textoCorrigido.replace('amanhã', '').trim();
+                    textoCorrigido = 'amanhã ' + textoCorrigido;
+                }
+                
+                // 3. REMOÇÃO DE ARTIGOS DESNECESSÁRIOS (Libras é menos dependente de artigos)
+                textoCorrigido = textoCorrigido.replace(/\b(o|a|os|as|um|uma|uns|umas)\b/g, '').trim();
+
+                // Garante que o texto está em maiúsculas (padrão para glossas de Libras)
+                return textoCorrigido.toUpperCase();
+            }
+        }
     </script>
+    
+</body>
+</html>
     
 </body>
 </html>
