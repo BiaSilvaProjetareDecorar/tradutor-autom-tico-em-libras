@@ -6,10 +6,10 @@
 <body>
 
     <h1>Tradutor Instantâneo para Libras</h1>
-    <p>Este é um protótipo com recursos gratuitos. Clique em "Iniciar Microfone" e fale. O avatar do VLibras fará a tradução adaptada. **Aguarde o avatar do VLibras aparecer antes de usar o microfone.**</p>
+    <p>Este é um protótipo com recursos gratuitos. O microfone será habilitado automaticamente assim que o VLibras estiver pronto.</p>
 
     <div id="saida-texto" style="border: 1px solid #ccc; padding: 10px; min-height: 50px; margin-bottom: 20px;">
-        **Seu texto transcrito e a tradução adaptada aparecerão aqui!**
+        Aguardando o avatar do VLibras carregar (pode levar alguns segundos)...
     </div>
 
     <div vw class="enabled">
@@ -21,8 +21,8 @@
     <script src="https://vlibras.gov.br/app/a006c000003Nf07/plugin.js" async defer></script>
 
 
-    <button id="iniciar" style="font-size: 18px; padding: 10px; background-color: green; color: white;">Iniciar Microfone</button>
-    <button id="parar" style="font-size: 18px; padding: 10px; background-color: red; color: white;">Parar</button>
+    <button id="iniciar" style="font-size: 18px; padding: 10px; background-color: grey; color: white;">Aguardando VLibras...</button>
+    <button id="parar" style="font-size: 18px; padding: 10px; background-color: red; color: white;" disabled>Parar</button>
     
     <script id="codigo-asr">
         const saidaTexto = document.getElementById('saida-texto');
@@ -34,6 +34,7 @@
         
         if (!SpeechRecognition) {
             saidaTexto.innerText = "ERRO: O seu navegador não suporta o Reconhecimento de Fala. Tente usar o Google Chrome.";
+            iniciarBtn.disabled = true;
         } else {
             const recognition = new SpeechRecognition();
             recognition.lang = 'pt-BR';
@@ -41,6 +42,24 @@
             
             let finalTranscript = '';
 
+            // ----------------------------------------------------------------
+            // LÓGICA DE INICIALIZAÇÃO: ESPERA PELO VLIBRAS
+            // ----------------------------------------------------------------
+            const checarVLibras = setInterval(() => {
+                if (window.VLibras && window.VLibras.widget) {
+                    clearInterval(checarVLibras); // Para de checar
+                    iniciarBtn.disabled = false; // Habilita o botão
+                    pararBtn.disabled = false;
+                    iniciarBtn.style.backgroundColor = 'green';
+                    iniciarBtn.innerText = 'Iniciar Microfone';
+                    saidaTexto.innerHTML = 'VLibras pronto! Clique em Iniciar Microfone.';
+                }
+            }, 500); // Checa a cada 500 milissegundos
+
+            // ----------------------------------------------------------------
+            // LÓGICA DE RECONHECIMENTO DE FALA (ASR)
+            // ----------------------------------------------------------------
+            
             // Lógica ao receber um resultado de fala
             recognition.onresult = (event) => {
                 let interimTranscript = '';
@@ -71,24 +90,17 @@
                     saidaTexto.innerText = `Original: ${finalTranscript}\n(Tradução adaptada: "${textoCorrigido}")`;
                     
                     // JOGA O TEXTO CORRIGIDO NO VLIBRAS
-                    // Implementação corrigida para usar o objeto global correto do VLibras (window.VLibras)
                     if (window.VLibras && window.VLibras.widget && window.VLibras.widget.translate) {
                         window.VLibras.widget.translate(textoCorrigido);
                         saidaTexto.innerText += `\n(Tradução enviada ao VLibras!)`;
                     } else {
-                        saidaTexto.innerText += `\n(VLibras não carregado - Recarregue a página se o avatar não aparecer.)`;
+                        saidaTexto.innerText += `\n(ERRO - VLibras não está pronto, tente recarregar a página.)`;
                     }
                 }
             };
 
             // Botão Iniciar
             iniciarBtn.addEventListener('click', () => {
-                // Checagem de segurança: só inicia se o VLibras estiver carregado
-                if (!window.VLibras) {
-                    saidaTexto.innerText = "ERRO: Aguarde o avatar do VLibras carregar antes de iniciar o microfone.";
-                    return;
-                }
-                
                 finalTranscript = ''; // Limpa antes de começar
                 recognition.start();
                 iniciarBtn.style.backgroundColor = 'orange';
