@@ -6,10 +6,10 @@
 <body>
 
     <h1>Tradutor Instantâneo para Libras</h1>
-    <p>Este é um protótipo com recursos gratuitos.</p>
+    <p>Este é um protótipo com recursos gratuitos. Clique em "Iniciar Microfone" e fale. O avatar do VLibras fará a tradução adaptada.</p>
 
     <div id="saida-texto" style="border: 1px solid #ccc; padding: 10px; min-height: 50px; margin-bottom: 20px;">
-        **Seu texto transcrito aparecerá aqui!**
+        **Seu texto transcrito e a tradução adaptada aparecerão aqui!**
     </div>
 
     <div vw class="enabled">
@@ -24,21 +24,19 @@
     <button id="iniciar" style="font-size: 18px; padding: 10px; background-color: green; color: white;">Iniciar Microfone</button>
     <button id="parar" style="font-size: 18px; padding: 10px; background-color: red; color: white;">Parar</button>
     
-    <script id="codigo-asr">const saidaTexto = document.getElementById('saida-texto');
+    <script id="codigo-asr">
+        const saidaTexto = document.getElementById('saida-texto');
         const iniciarBtn = document.getElementById('iniciar');
         const pararBtn = document.getElementById('parar');
-        const vlibrasPlugin = window.VlibrasPlugin;
 
-        // Verifica se a API de Reconhecimento de Fala está disponível no navegador
+        // Verifica se a API de Reconhecimento de Fala está disponível
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         
         if (!SpeechRecognition) {
             saidaTexto.innerText = "ERRO: O seu navegador não suporta o Reconhecimento de Fala. Tente usar o Google Chrome.";
         } else {
             const recognition = new SpeechRecognition();
-            // Define o idioma para Português do Brasil
             recognition.lang = 'pt-BR';
-            // Configura para capturar resultados provisórios (em tempo real)
             recognition.interimResults = true;
             
             let finalTranscript = '';
@@ -58,7 +56,7 @@
                 }
                 
                 // Exibe o texto em tempo real (provavelmente final + interim)
-                saidaTexto.innerText = finalTranscript + interimTranscript;
+                saidaTexto.innerText = `Original: ${finalTranscript + interimTranscript}`;
             };
 
             // Lógica ao terminar de capturar um bloco de fala
@@ -67,15 +65,18 @@
                 iniciarBtn.innerText = 'Iniciar Microfone';
                 
                 if (finalTranscript.trim().length > 0) {
-                    // *** PONTO CRÍTICO: CHAMA A FUNÇÃO DE TRADUÇÃO AQUI ***
+                    // CHAMA A FUNÇÃO DE REGRAS E ADAPTAÇÃO
                     const textoCorrigido = aplicarRegrasDeLibras(finalTranscript.trim());
                     
+                    saidaTexto.innerText = `Original: ${finalTranscript}\n(Tradução adaptada: "${textoCorrigido}")`;
+                    
                     // JOGA O TEXTO CORRIGIDO NO VLIBRAS
-                    if (vlibrasPlugin && vlibrasPlugin.translate) {
-                        vlibrasPlugin.translate(textoCorrigido);
+                    // CORREÇÃO: Usamos o objeto global window.VLibras para garantir a comunicação
+                    if (window.VLibras && window.VLibras.widget && window.VLibras.widget.translate) {
+                        window.VLibras.widget.translate(textoCorrigido);
+                        saidaTexto.innerText += `\n(Tradução enviada ao VLibras!)`;
                     } else {
-                        // Se o VLibras não carregou, exibe a saída.
-                        saidaTexto.innerText += `\n(VLibras não carregado, tradução: "${textoCorrigido}")`;
+                        saidaTexto.innerText += `\n(VLibras não carregado - Recarregue a página se o avatar não aparecer.)`;
                     }
                 }
             };
@@ -108,43 +109,49 @@
             };
             
             // ----------------------------------------------------------------
-            // *** FASE 3: O CÉREBRO - FUNÇÃO DE REGRAS DE ADAPTAÇÃO PARA LIBRAS ***
+            // *** FASE 3: O CÉREBRO - FUNÇÃO DE REGRAS DE ADAPTAÇÃO PARA LIBRAS (Aprimorada) ***
             // ----------------------------------------------------------------
             function aplicarRegrasDeLibras(textoOriginal) {
-                // O texto do ASR vem sem pontuação e, em geral, em letras minúsculas.
+                // 1. Limpeza Inicial
                 let textoCorrigido = textoOriginal.toLowerCase();
-                
-                // 1. REGRAS DE SUBSTITUIÇÃO SIMPLES (VOCÊ PODE ADICIONAR MAIS AQUI)
-                // Exemplo: 'tá bom' vira 'ok' (sinal mais direto)
+
+                // 2. CORREÇÃO E SUBSTITUIÇÃO LINGUÍSTICA (Priorizando a Glosa da Libras)
                 textoCorrigido = textoCorrigido.replace(/\btá bom\b/g, 'ok');
-                
-                // Exemplo: 'a gente' vira 'nós' (mais direto na Libras)
                 textoCorrigido = textoCorrigido.replace(/\ba gente\b/g, 'nós');
+                textoCorrigido = textoCorrigido.replace(/\bmeu\b/g, 'eu');
+                textoCorrigido = textoCorrigido.replace(/\bminha\b/g, 'eu');
                 
-                // Exemplo: 'não' + verbo é uma construção comum. Substituir por 'NÃO' no final (parcialmente)
-                // A negação é muito complexa, mas a substituição ajuda no entendimento.
-                textoCorrigido = textoCorrigido.replace(/\bnão (vou|quero|gosto)\b/g, 'NÃO ');
+                // Exemplo de correção de erro de transcrição:
+                textoCorrigido = textoCorrigido.replace(/\bsapo\b/g, 'saber'); 
+                textoCorrigido = textoCorrigido.replace(/\bque a\b/g, ''); 
                 
-                // 2. REGRAS DE REORDENAÇÃO (MAIS DIFÍCIL SEM ESTRUTURA, MAS ESSENCIAL)
+                // 3. REGRAS DE TEMPO/NEGAÇÃO (Para ordenar como na Libras)
                 
-                // Exemplo muito simplificado de SVO T (Sujeito, Verbo, Objeto, Tempo)
-                // O "amanhã" deve ir no início para Libras (TEMPO)
+                // Mover Advérbios de Tempo (amanhã, ontem) para o INÍCIO
                 if (textoCorrigido.includes('amanhã')) {
                     textoCorrigido = textoCorrigido.replace('amanhã', '').trim();
                     textoCorrigido = 'amanhã ' + textoCorrigido;
                 }
                 
-                // 3. REMOÇÃO DE ARTIGOS DESNECESSÁRIOS (Libras é menos dependente de artigos)
-                textoCorrigido = textoCorrigido.replace(/\b(o|a|os|as|um|uma|uns|umas)\b/g, '').trim();
+                // Mover a negação 'não' para o FINAL da frase (muito simplificado)
+                if (textoCorrigido.includes(' não ')) {
+                    textoCorrigido = textoCorrigido.replace(' não ', ' ');
+                    textoCorrigido = textoCorrigido.trim() + ' NÃO';
+                }
+
+                // 4. REMOÇÃO DE ARTIGOS/PREPOSIÇÕES DESNECESSÁRIAS
+                textoCorrigido = textoCorrigido.replace(/\b(o|a|os|as|um|uma|uns|umas|de|da|do|e|em)\b/g, '').trim();
 
                 // Garante que o texto está em maiúsculas (padrão para glossas de Libras)
+                textoCorrigido = textoCorrigido.replace(/[.?]/g, '');
+                
+                // Remove espaços duplos
+                textoCorrigido = textoCorrigido.replace(/\s+/g, ' ').trim();
+
                 return textoCorrigido.toUpperCase();
             }
         }
     </script>
-    
-</body>
-</html>
     
 </body>
 </html>
