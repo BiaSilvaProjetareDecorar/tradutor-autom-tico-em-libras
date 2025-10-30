@@ -6,7 +6,7 @@
 <body>
 
     <h1>Tradutor Instantâneo de Áudio para Libras</h1>
-    <p>Clique em "Iniciar Microfone" para traduzir áudios ou vídeos. A tradução adaptada abrirá em uma nova aba.</p>
+    <p>O microfone está ativo! Fale a frase. A tradução adaptada abrirá em uma nova aba.</p>
 
     <div id="saida-texto" style="border: 1px solid #ccc; padding: 10px; min-height: 50px; margin-bottom: 20px;">
         Clique em "Iniciar Microfone" para começar.
@@ -29,7 +29,6 @@
         const iniciarBtn = document.getElementById('iniciar');
         const pararBtn = document.getElementById('parar');
 
-        // Verifica se a API de Reconhecimento de Fala está disponível
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         
         if (!SpeechRecognition) {
@@ -56,7 +55,6 @@
                     }
                 }
                 
-                // Exibe o texto em tempo real
                 saidaTexto.innerText = `Original: ${finalTranscript + interimTranscript}`;
             };
 
@@ -72,10 +70,10 @@
                     
                     saidaTexto.innerText = `Original: ${finalTranscript}\n(Tradução adaptada: "${textoCorrigido}")`;
                     
-                    // JOGA O TEXTO CORRIGIDO NO VLIBRAS (SOLUÇÃO DE REDIRECIONAMENTO ESTÁVEL)
-                    const linkVLibras = `https://vlibras.gov.br/app/widget/#/tradutor?text=${encodeURIComponent(textoCorrigido)}`;
+                    // JOGA O TEXTO CORRIGIDO NO VLIBRAS (SOLUÇÃO FINAL COM O LINK MAIS ESTÁVEL)
+                    // Este link usa a página principal do VLibras para tradução, contornando o erro de "package size"
+                    const linkVLibras = `https://www.vlibras.gov.br/tradutor/?texto=${encodeURIComponent(textoCorrigido)}`;
 
-                    // Abre a tradução em uma nova aba para o usuário ver o avatar funcionando
                     window.open(linkVLibras, '_blank');
                     
                     saidaTexto.innerText += `\n(A tradução completa abriu em uma nova aba para visualização do avatar!)`;
@@ -85,7 +83,7 @@
             // Botão Iniciar
             iniciarBtn.addEventListener('click', () => {
                 if (typeof recognition.start === 'function') {
-                    finalTranscript = ''; 
+                    finalTranscript = '';
                     recognition.start();
                     iniciarBtn.style.backgroundColor = 'orange';
                     iniciarBtn.innerText = 'Gravando...';
