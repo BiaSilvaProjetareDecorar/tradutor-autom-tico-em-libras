@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tradutor Automático para Libras - Protótipo Gratuito</title>
+    <title>Tradutor Automático de Texto para Libras - Protótipo Garantido</title>
 </head>
 <body>
 
-    <h1>Tradutor Instantâneo para Libras</h1>
-    <p>Este é um protótipo com recursos gratuitos. A tradução adaptada abrirá em uma nova aba, garantindo a visualização do avatar do VLibras.</p>
+    <h1>Tradutor Automático de Texto para Libras</h1>
+    <p>Digite a frase em Português e clique em Traduzir. A adaptação linguística será feita pelas suas regras, e o resultado abrirá em uma nova aba.</p>
 
-    <div id="saida-texto" style="border: 1px solid #ccc; padding: 10px; min-height: 50px; margin-bottom: 20px;">
-        Clique em "Iniciar Microfone". A tradução adaptada abrirá em uma nova aba.
+    <textarea id="texto-original" rows="4" cols="50" style="width: 100%; font-size: 16px; margin-bottom: 10px;" placeholder="Digite aqui a frase em Português (Ex: Eu comprei uma casa bonita ontem.)"></textarea>
+
+    <div id="saida-texto" style="border: 1px solid #ccc; padding: 10px; min-height: 50px; margin-bottom: 20px; background-color: #f0f0f0;">
+        A tradução adaptada aparecerá aqui!
     </div>
 
+    <button id="traduzir-btn" style="font-size: 18px; padding: 10px; background-color: #007bff; color: white;">Traduzir para Libras</button>
+    
     <div vw class="enabled">
         <div vw-access-button class="active"></div>
         <div vw-plugin-wrapper>
@@ -21,151 +25,85 @@
     <script src="https://vlibras.gov.br/app/a006c000003Nf07/plugin.js" async defer></script>
 
 
-    <button id="iniciar" style="font-size: 18px; padding: 10px; background-color: green; color: white;">Iniciar Microfone</button>
-    <button id="parar" style="font-size: 18px; padding: 10px; background-color: red; color: white;" disabled>Parar</button>
-    
-    <script id="codigo-asr">
-        const saidaTexto = document.getElementById('saida-texto');
-        const iniciarBtn = document.getElementById('iniciar');
-        const pararBtn = document.getElementById('parar');
+    <script id="codigo-traducao">
+        const textoOriginalEl = document.getElementById('texto-original');
+        const saidaTextoEl = document.getElementById('saida-texto');
+        const traduzirBtn = document.getElementById('traduzir-btn');
 
-        // Verifica se a API de Reconhecimento de Fala está disponível
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        
-        if (!SpeechRecognition) {
-            saidaTexto.innerText = "ERRO: O seu navegador não suporta o Reconhecimento de Fala. Tente usar o Google Chrome.";
-            iniciarBtn.disabled = true;
-        } else {
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'pt-BR';
-            recognition.interimResults = true;
+        // AÇÃO PRINCIPAL AO CLICAR EM TRADUZIR
+        traduzirBtn.addEventListener('click', () => {
+            const textoOriginal = textoOriginalEl.value.trim();
             
-            let finalTranscript = '';
-
-            // Lógica ao receber um resultado de fala
-            recognition.onresult = (event) => {
-                let interimTranscript = '';
-                finalTranscript = '';
-
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const transcript = event.results[i][0].transcript;
-                    if (event.results[i].isFinal) {
-                        finalTranscript += transcript + ' ';
-                    } else {
-                        interimTranscript += transcript;
-                    }
-                }
-                
-                // Exibe o texto em tempo real (provavelmente final + interim)
-                saidaTexto.innerText = `Original: ${finalTranscript + interimTranscript}`;
-            };
-
-            // Lógica ao terminar de capturar um bloco de fala
-            recognition.onend = () => {
-                iniciarBtn.style.backgroundColor = 'green';
-                iniciarBtn.innerText = 'Iniciar Microfone';
-                pararBtn.disabled = true; // Desabilita o parar ao terminar
-                
-                if (finalTranscript.trim().length > 0) {
-                    // CHAMA A FUNÇÃO DE REGRAS E ADAPTAÇÃO
-                    const textoCorrigido = aplicarRegrasDeLibras(finalTranscript.trim());
-                    
-                    saidaTexto.innerText = `Original: ${finalTranscript}\n(Tradução adaptada: "${textoCorrigido}")`;
-                    
-                    // JOGA O TEXTO CORRIGIDO NO VLIBRAS (SOLUÇÃO DE REDIRECIONAMENTO COM LINK CORRIGIDO)
-                    const linkVLibras = `https://www.vlibras.gov.br/translate/#text=${encodeURIComponent(textoCorrigido)}`;
-
-                    // Abre a tradução em uma nova aba para o usuário ver o avatar funcionando
-                    window.open(linkVLibras, '_blank');
-                    
-                    saidaTexto.innerText += `\n(A tradução completa abriu em uma nova aba para visualização do avatar!)`;
-                }
-            };
-
-            // Botão Iniciar
-            iniciarBtn.addEventListener('click', () => {
-                // Checa a permissão antes de iniciar
-                if (typeof recognition.start === 'function') {
-                    finalTranscript = ''; // Limpa antes de começar
-                    recognition.start();
-                    iniciarBtn.style.backgroundColor = 'orange';
-                    iniciarBtn.innerText = 'Gravando...';
-                    pararBtn.disabled = false; // Habilita o parar
-                } else {
-                    saidaTexto.innerText = "ERRO: O Microfone não pode ser iniciado. Verifique se o navegador permitiu o acesso.";
-                }
-            });
-
-            // Botão Parar
-            pararBtn.addEventListener('click', () => {
-                recognition.stop();
-                iniciarBtn.style.backgroundColor = 'green';
-                iniciarBtn.innerText = 'Iniciar Microfone';
-                pararBtn.disabled = true;
-            });
-            
-            // Tratamento de erro
-            recognition.onerror = (event) => {
-                console.error(event.error);
-                if (event.error === 'not-allowed') {
-                     saidaTexto.innerText = "Erro: Acesso ao microfone negado. Por favor, permita o uso do microfone nas configurações do navegador.";
-                } else {
-                    saidaTexto.innerText = `Erro na transcrição: ${event.error}`;
-                }
-                iniciarBtn.style.backgroundColor = 'green';
-                iniciarBtn.innerText = 'Iniciar Microfone';
-                pararBtn.disabled = true;
-            };
-            
-            // ----------------------------------------------------------------
-            // *** FASE 3: O CÉREBRO - FUNÇÃO DE REGRAS DE ADAPTAÇÃO PARA LIBRAS (O foco principal) ***
-            // ----------------------------------------------------------------
-            function aplicarRegrasDeLibras(textoOriginal) {
-                // 1. Limpeza Inicial
-                let textoCorrigido = textoOriginal.toLowerCase();
-
-                // 2. CORREÇÃO E SUBSTITUIÇÃO LINGUÍSTICA (Priorizando a Glosa da Libras)
-                textoCorrigido = textoCorrigido.replace(/\btá bom\b/g, 'ok');
-                textoCorrigido = textoCorrigido.replace(/\ba gente\b/g, 'nós');
-                textoCorrigido = textoCorrigido.replace(/\bmeu\b/g, 'eu');
-                textoCorrigido = textoCorrigido.replace(/\bminha\b/g, 'eu');
-                
-                // Correção de erros de transcrição comuns
-                textoCorrigido = textoCorrigido.replace(/\bsapo\b/g, 'saber'); 
-                textoCorrigido = textoCorrigido.replace(/\bque a\b/g, ''); 
-                
-                // **REGRAS PARA SIMPLIFICAÇÃO DE VERBOS E TEMPO**
-                textoCorrigido = textoCorrigido.replace(/\bcomprei\b/g, 'comprar'); 
-                textoCorrigido = textoCorrigido.replace(/\bfui\b/g, 'ir');         
-                
-                // 3. REGRAS DE TEMPO/NEGAÇÃO (Para ordenar como na Libras)
-                
-                // Mover Advérbios de Tempo para o INÍCIO
-                if (textoCorrigido.includes('amanhã')) {
-                    textoCorrigido = textoCorrigido.replace('amanhã', '').trim();
-                    textoCorrigido = 'amanhã ' + textoCorrigido;
-                }
-                if (textoCorrigido.includes('ontem')) {
-                    textoCorrigido = textoCorrigido.replace('ontem', '').trim();
-                    textoCorrigido = 'ontem ' + textoCorrigido;
-                }
-                
-                // Mover a negação 'não' para o FINAL da frase
-                if (textoCorrigido.includes(' não ')) {
-                    textoCorrigido = textoCorrigido.replace(' não ', ' ');
-                    textoCorrigido = textoCorrigido.trim() + ' NÃO';
-                }
-
-                // 4. REMOÇÃO FINAL
-                // Artigos/Preposições desnecessárias
-                textoCorrigido = textoCorrigido.replace(/\b(o|a|os|as|um|uma|uns|umas|de|da|do|e|em)\b/g, '').trim();
-
-                // Formatação final
-                textoCorrigido = textoCorrigido.replace(/[.?]/g, '');
-                textoCorrigido = textoCorrigido.replace(/\s+/g, ' ').trim();
-
-                return textoCorrigido.toUpperCase();
+            if (textoOriginal.length === 0) {
+                saidaTextoEl.innerText = "Por favor, digite uma frase para traduzir.";
+                return;
             }
+
+            // CHAMA A FUNÇÃO DE REGRAS E ADAPTAÇÃO
+            const textoCorrigido = aplicarRegrasDeLibras(textoOriginal);
+            
+            saidaTextoEl.innerHTML = `
+                <strong>Original:</strong> ${textoOriginal}<br>
+                <strong>Tradução Adaptada:</strong> ${textoCorrigido}
+            `;
+            
+            // JOGA O TEXTO CORRIGIDO NO VLIBRAS (SOLUÇÃO DE REDIRECIONAMENTO GARANTIDA)
+            const linkVLibras = `https://www.vlibras.gov.br/translate/#text=${encodeURIComponent(textoCorrigido)}`;
+
+            // Abre a tradução em uma nova aba para o usuário ver o avatar funcionando
+            window.open(linkVLibras, '_blank');
+            
+            saidaTextoEl.innerHTML += `<br><em>A tradução completa abriu em uma nova aba para visualização do avatar!</em>`;
+        });
+        
+        // ----------------------------------------------------------------
+        // *** FASE 3: O CÉREBRO - FUNÇÃO DE REGRAS DE ADAPTAÇÃO PARA LIBRAS (O foco principal) ***
+        // ----------------------------------------------------------------
+        function aplicarRegrasDeLibras(textoOriginal) {
+            // 1. Limpeza Inicial
+            let textoCorrigido = textoOriginal.toLowerCase();
+
+            // 2. CORREÇÃO E SUBSTITUIÇÃO LINGUÍSTICA (Priorizando a Glosa da Libras)
+            textoCorrigido = textoCorrigido.replace(/\btá bom\b/g, 'ok');
+            textoCorrigido = textoCorrigido.replace(/\ba gente\b/g, 'nós');
+            textoCorrigido = textoCorrigido.replace(/\bmeu\b/g, 'eu');
+            textoCorrigido = textoCorrigido.replace(/\bminha\b/g, 'eu');
+            
+            // Correção de erros de transcrição comuns
+            textoCorrigido = textoCorrigido.replace(/\bsapo\b/g, 'saber'); 
+            textoCorrigido = textoCorrigido.replace(/\bque a\b/g, ''); 
+            
+            // **REGRAS PARA SIMPLIFICAÇÃO DE VERBOS E TEMPO**
+            textoCorrigido = textoCorrigido.replace(/\bcomprei\b/g, 'comprar'); 
+            textoCorrigido = textoCorrigido.replace(/\bfui\b/g, 'ir');         
+            
+            // 3. REGRAS DE TEMPO/NEGAÇÃO (Para ordenar como na Libras)
+            
+            // Mover Advérbios de Tempo para o INÍCIO
+            if (textoCorrigido.includes('amanhã')) {
+                textoCorrigido = textoCorrigido.replace('amanhã', '').trim();
+                textoCorrigido = 'amanhã ' + textoCorrigido;
+            }
+            if (textoCorrigido.includes('ontem')) {
+                textoCorrigido = textoCorrigido.replace('ontem', '').trim();
+                textoCorrigido = 'ontem ' + textoCorrigido;
+            }
+            
+            // Mover a negação 'não' para o FINAL da frase
+            if (textoCorrigido.includes(' não ')) {
+                textoCorrigido = textoCorrigido.replace(' não ', ' ');
+                textoCorrigido = textoCorrigido.trim() + ' NÃO';
+            }
+
+            // 4. REMOÇÃO FINAL
+            // Artigos/Preposições desnecessárias
+            textoCorrigido = textoCorrigido.replace(/\b(o|a|os|as|um|uma|uns|umas|de|da|do|e|em)\b/g, '').trim();
+
+            // Formatação final
+            textoCorrigido = textoCorrigido.replace(/[.?]/g, '');
+            textoCorrigido = textoCorrigido.replace(/\s+/g, ' ').trim();
+
+            return textoCorrigido.toUpperCase();
         }
     </script>
     
