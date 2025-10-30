@@ -123,6 +123,9 @@
                 // 2. CORREÇÃO E SUBSTITUIÇÃO LINGUÍSTICA
                 textoCorrigido = textoCorrigido.replace(/\btá bom\b/g, 'ok');
                 textoCorrigido = textoCorrigido.replace(/\ba gente\b/g, 'nós');
+                
+                // CORREÇÃO DOS PRONOMES POSSESSIVOS: Remove 'meu' e 'minha' e coloca 'eu'
+                // Isso garante que o pronome seja sinalizado primeiro.
                 textoCorrigido = textoCorrigido.replace(/\bmeu\b/g, 'eu');
                 textoCorrigido = textoCorrigido.replace(/\bminha\b/g, 'eu');
                 
@@ -130,22 +133,23 @@
                 textoCorrigido = textoCorrigido.replace(/\bobrigado\b/g, 'obrigado'); 
                 textoCorrigido = textoCorrigido.replace(/\bnao\b/g, 'não'); 
                 
-                // **REGRAS PARA SIMPLIFICAÇÃO DE VERBOS (Ser/Estar/Comprar/Ir)**
+                // **REGRAS PARA SIMPLIFICAÇÃO DE VERBOS E TEMPO**
                 textoCorrigido = textoCorrigido.replace(/\bcomprei\b/g, 'comprar'); 
                 textoCorrigido = textoCorrigido.replace(/\bfui\b/g, 'ir');         
                 textoCorrigido = textoCorrigido.replace(/\bgosta\b/g, 'gostar'); 
                 textoCorrigido = textoCorrigido.replace(/\bvai\b/g, 'ir'); 
                 textoCorrigido = textoCorrigido.replace(/\bvá\b/g, 'ir'); 
                 
-                // NOVO: Simplificar 'é', 'está', 'sou', 'somos' (Verbo Ser/Estar é frequentemente omitido)
-                textoCorrigido = textoCorrigido.replace(/\b(é|está|sou|somos|estar)\b/g, ''); 
+                // CORREÇÃO FINAL DO VERBO SER (inclui 'é' com e sem acento)
+                // O Verbo Ser/Estar é frequentemente omitido.
+                textoCorrigido = textoCorrigido.replace(/\b(é|está|estou|somos|estar)\b/g, ''); 
 
 
                 // 3. REGRAS DE TEMPO/NEGAÇÃO (Para ordenar como na Libras)
                 
                 // Mover Advérbios de Tempo para o INÍCIO
                 if (textoCorrigido.includes('amanhã')) {
-                    textoCorrigido = textoCorrigido.replace('amanhã', '').trim();
+                    textoCorrigido = textoCorrigido.replace('amanhã', '').trim());
                     textoCorrigido = 'amanhã ' + textoCorrigido;
                 }
                 if (textoCorrigido.includes('ontem')) {
@@ -167,7 +171,7 @@
                 }
 
                 // 5. REMOÇÃO FINAL
-                // Artigos/Preposições desnecessárias e pontuação (corrigida para 'à' e 'a')
+                // Artigos/Preposições desnecessárias e pontuação
                 textoCorrigido = textoCorrigido.replace(/\b(o|a|à|os|as|um|uma|uns|umas|de|da|do|e|em|por)\b/g, '').trim();
                 textoCorrigido = textoCorrigido.replace(/[.?]/g, '');
 
