@@ -5,11 +5,11 @@
 </head>
 <body>
 
-    <h1>Tradutor Instantâneo para Libras</h1>
-    <p>O microfone está ativo! Fale a frase. A tradução adaptada abrirá em uma nova aba, garantindo a visualização do avatar do VLibras.</p>
+    <h1>Tradutor Instantâneo de Áudio para Libras</h1>
+    <p>Clique em "Iniciar Microfone" para traduzir áudios ou vídeos. A tradução adaptada abrirá em uma nova aba.</p>
 
     <div id="saida-texto" style="border: 1px solid #ccc; padding: 10px; min-height: 50px; margin-bottom: 20px;">
-        Clique em "Iniciar Microfone".
+        Clique em "Iniciar Microfone" para começar.
     </div>
 
     <div vw class="enabled">
@@ -72,7 +72,7 @@
                     
                     saidaTexto.innerText = `Original: ${finalTranscript}\n(Tradução adaptada: "${textoCorrigido}")`;
                     
-                    // JOGA O TEXTO CORRIGIDO NO VLIBRAS (SOLUÇÃO DE REDIRECIONAMENTO COM O LINK MAIS ESTÁVEL)
+                    // JOGA O TEXTO CORRIGIDO NO VLIBRAS (SOLUÇÃO DE REDIRECIONAMENTO ESTÁVEL)
                     const linkVLibras = `https://vlibras.gov.br/app/widget/#/tradutor?text=${encodeURIComponent(textoCorrigido)}`;
 
                     // Abre a tradução em uma nova aba para o usuário ver o avatar funcionando
@@ -85,7 +85,7 @@
             // Botão Iniciar
             iniciarBtn.addEventListener('click', () => {
                 if (typeof recognition.start === 'function') {
-                    finalTranscript = '';
+                    finalTranscript = ''; 
                     recognition.start();
                     iniciarBtn.style.backgroundColor = 'orange';
                     iniciarBtn.innerText = 'Gravando...';
@@ -117,12 +117,53 @@
             };
             
             // ----------------------------------------------------------------
-            // *** FASE 3: O CÉREBRO - FUNÇÃO DE REGRAS DE ADAPTAÇÃO PARA LIBRAS (O foco principal) ***
+            // *** FASE 3: O CÉREBRO - FUNÇÃO DE REGRAS DE ADAPTAÇÃO PARA LIBRAS (Regras Aprimoradas) ***
             // ----------------------------------------------------------------
             function aplicarRegrasDeLibras(textoOriginal) {
                 // 1. Limpeza Inicial
                 let textoCorrigido = textoOriginal.toLowerCase();
 
-                // 2. CORREÇÃO E SUBSTITUIÇÃO LINGUÍSTICA (Priorizando a Glosa da Libras)
+                // 2. CORREÇÃO E SUBSTITUIÇÃO LINGUÍSTICA
                 textoCorrigido = textoCorrigido.replace(/\btá bom\b/g, 'ok');
-                textoCorrig
+                textoCorrigido = textoCorrigido.replace(/\ba gente\b/g, 'nós');
+                textoCorrigido = textoCorrigido.replace(/\bmeu\b/g, 'eu');
+                textoCorrigido = textoCorrigido.replace(/\bminha\b/g, 'eu');
+                
+                // **REGRAS PARA SIMPLIFICAÇÃO DE VERBOS E TEMPO**
+                textoCorrigido = textoCorrigido.replace(/\bcomprei\b/g, 'comprar'); 
+                textoCorrigido = textoCorrigido.replace(/\bfui\b/g, 'ir');         
+                textoCorrigido = textoCorrigido.replace(/\bgosta\b/g, 'gostar'); 
+                
+                // 3. REGRAS DE TEMPO/NEGAÇÃO (Para ordenar como na Libras)
+                
+                // Mover Advérbios de Tempo para o INÍCIO
+                if (textoCorrigido.includes('amanhã')) {
+                    textoCorrigido = textoCorrigido.replace('amanhã', '').trim();
+                    textoCorrigido = 'amanhã ' + textoCorrigido;
+                }
+                if (textoCorrigido.includes('ontem')) {
+                    textoCorrigido = textoCorrigido.replace('ontem', '').trim();
+                    textoCorrigido = 'ontem ' + textoCorrigido;
+                }
+                
+                // Mover a negação 'não' para o FINAL da frase
+                if (textoCorrigido.includes(' não ')) {
+                    textoCorrigido = textoCorrigido.replace(' não ', ' ');
+                    textoCorrigido = textoCorrigido.trim() + ' NÃO';
+                }
+
+                // 4. REMOÇÃO FINAL
+                // Artigos/Preposições desnecessárias e pontuação
+                textoCorrigido = textoCorrigido.replace(/\b(o|a|os|as|um|uma|uns|umas|de|da|do|e|em)\b/g, '').trim();
+                textoCorrigido = textoCorrigido.replace(/[.?]/g, '');
+
+                // Formatação final
+                textoCorrigido = textoCorrigido.replace(/\s+/g, ' ').trim();
+
+                return textoCorrigido.toUpperCase();
+            }
+        }
+    </script>
+    
+</body>
+</html>
