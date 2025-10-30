@@ -6,7 +6,7 @@
 <body>
 
     <h1>Tradutor Instantâneo de Áudio para Libras</h1>
-    <p>O microfone está ativo! Fale a frase. A tradução adaptada abrirá em uma nova aba.</p>
+    <p>Clique em "Iniciar Microfone" para traduzir áudios ou vídeos. A tradução adaptada abrirá em uma nova aba.</p>
 
     <div id="saida-texto" style="border: 1px solid #ccc; padding: 10px; min-height: 50px; margin-bottom: 20px;">
         Clique em "Iniciar Microfone" para começar.
@@ -71,7 +71,6 @@
                     saidaTexto.innerText = `Original: ${finalTranscript}\n(Tradução adaptada: "${textoCorrigido}")`;
                     
                     // JOGA O TEXTO CORRIGIDO NO VLIBRAS (SOLUÇÃO FINAL COM O LINK MAIS ESTÁVEL)
-                    // Este link usa a página principal do VLibras para tradução, contornando o erro de "package size"
                     const linkVLibras = `https://www.vlibras.gov.br/tradutor/?texto=${encodeURIComponent(textoCorrigido)}`;
 
                     window.open(linkVLibras, '_blank');
@@ -124,13 +123,12 @@
                 // 2. CORREÇÃO E SUBSTITUIÇÃO LINGUÍSTICA
                 textoCorrigido = textoCorrigido.replace(/\btá bom\b/g, 'ok');
                 textoCorrigido = textoCorrigido.replace(/\ba gente\b/g, 'nós');
-                textoCorrigido = textoCorrigido.replace(/\bmeu\b/g, 'eu');
-                textoCorrigido = textoCorrigido.replace(/\bminha\b/g, 'eu');
                 
                 // **REGRAS PARA SIMPLIFICAÇÃO DE VERBOS E TEMPO**
                 textoCorrigido = textoCorrigido.replace(/\bcomprei\b/g, 'comprar'); 
                 textoCorrigido = textoCorrigido.replace(/\bfui\b/g, 'ir');         
                 textoCorrigido = textoCorrigido.replace(/\bgosta\b/g, 'gostar'); 
+                textoCorrigido = textoCorrigido.replace(/\bvai\b/g, 'ir'); // NOVO: 'vai' vira 'ir'
                 
                 // 3. REGRAS DE TEMPO/NEGAÇÃO (Para ordenar como na Libras)
                 
@@ -150,7 +148,18 @@
                     textoCorrigido = textoCorrigido.trim() + ' NÃO';
                 }
 
-                // 4. REMOÇÃO FINAL
+                // 4. REORDENAÇÃO DE VERBOS (Colocar o verbo no final ou após o objeto)
+                // Se a frase tem 'ir' (vai), move-o para o final (Ex: VOCÊ FESTA IR)
+                if (textoCorrigido.includes(' ir ')) {
+                     let partes = textoCorrigido.split(' ');
+                     // Remove o 'ir' da posição original
+                     partes = partes.filter(p => p !== 'ir');
+                     // Adiciona o 'ir' no final
+                     textoCorrigido = partes.join(' ') + ' IR';
+                }
+
+
+                // 5. REMOÇÃO FINAL
                 // Artigos/Preposições desnecessárias e pontuação
                 textoCorrigido = textoCorrigido.replace(/\b(o|a|os|as|um|uma|uns|umas|de|da|do|e|em)\b/g, '').trim();
                 textoCorrigido = textoCorrigido.replace(/[.?]/g, '');
