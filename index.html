@@ -76,4 +76,98 @@
                     const linkVLibras = `https://www.vlibras.gov.br/translate/#text=${encodeURIComponent(textoCorrigido)}`;
 
                     // Abre a tradução em uma nova aba para o usuário ver o avatar funcionando
-                    window.open(linkVLibras,
+                    window.open(linkVLibras, '_blank');
+                    
+                    saidaTexto.innerText += `\n(A tradução completa abriu em uma nova aba para visualização do avatar!)`;
+                }
+            };
+
+            // Botão Iniciar
+            iniciarBtn.addEventListener('click', () => {
+                // Checa a permissão antes de iniciar
+                if (typeof recognition.start === 'function') {
+                    finalTranscript = ''; // Limpa antes de começar
+                    recognition.start();
+                    iniciarBtn.style.backgroundColor = 'orange';
+                    iniciarBtn.innerText = 'Gravando...';
+                    pararBtn.disabled = false; // Habilita o parar
+                } else {
+                    saidaTexto.innerText = "ERRO: O Microfone não pode ser iniciado. Verifique se o navegador permitiu o acesso.";
+                }
+            });
+
+            // Botão Parar
+            pararBtn.addEventListener('click', () => {
+                recognition.stop();
+                iniciarBtn.style.backgroundColor = 'green';
+                iniciarBtn.innerText = 'Iniciar Microfone';
+                pararBtn.disabled = true;
+            });
+            
+            // Tratamento de erro
+            recognition.onerror = (event) => {
+                console.error(event.error);
+                if (event.error === 'not-allowed') {
+                     saidaTexto.innerText = "Erro: Acesso ao microfone negado. Por favor, permita o uso do microfone nas configurações do navegador.";
+                } else {
+                    saidaTexto.innerText = `Erro na transcrição: ${event.error}`;
+                }
+                iniciarBtn.style.backgroundColor = 'green';
+                iniciarBtn.innerText = 'Iniciar Microfone';
+                pararBtn.disabled = true;
+            };
+            
+            // ----------------------------------------------------------------
+            // *** FASE 3: O CÉREBRO - FUNÇÃO DE REGRAS DE ADAPTAÇÃO PARA LIBRAS (O foco principal) ***
+            // ----------------------------------------------------------------
+            function aplicarRegrasDeLibras(textoOriginal) {
+                // 1. Limpeza Inicial
+                let textoCorrigido = textoOriginal.toLowerCase();
+
+                // 2. CORREÇÃO E SUBSTITUIÇÃO LINGUÍSTICA (Priorizando a Glosa da Libras)
+                textoCorrigido = textoCorrigido.replace(/\btá bom\b/g, 'ok');
+                textoCorrigido = textoCorrigido.replace(/\ba gente\b/g, 'nós');
+                textoCorrigido = textoCorrigido.replace(/\bmeu\b/g, 'eu');
+                textoCorrigido = textoCorrigido.replace(/\bminha\b/g, 'eu');
+                
+                // Correção de erros de transcrição comuns
+                textoCorrigido = textoCorrigido.replace(/\bsapo\b/g, 'saber'); 
+                textoCorrigido = textoCorrigido.replace(/\bque a\b/g, ''); 
+                
+                // **REGRAS PARA SIMPLIFICAÇÃO DE VERBOS E TEMPO**
+                textoCorrigido = textoCorrigido.replace(/\bcomprei\b/g, 'comprar'); 
+                textoCorrigido = textoCorrigido.replace(/\bfui\b/g, 'ir');         
+                
+                // 3. REGRAS DE TEMPO/NEGAÇÃO (Para ordenar como na Libras)
+                
+                // Mover Advérbios de Tempo para o INÍCIO
+                if (textoCorrigido.includes('amanhã')) {
+                    textoCorrigido = textoCorrigido.replace('amanhã', '').trim();
+                    textoCorrigido = 'amanhã ' + textoCorrigido;
+                }
+                if (textoCorrigido.includes('ontem')) {
+                    textoCorrigido = textoCorrigido.replace('ontem', '').trim();
+                    textoCorrigido = 'ontem ' + textoCorrigido;
+                }
+                
+                // Mover a negação 'não' para o FINAL da frase
+                if (textoCorrigido.includes(' não ')) {
+                    textoCorrigido = textoCorrigido.replace(' não ', ' ');
+                    textoCorrigido = textoCorrigido.trim() + ' NÃO';
+                }
+
+                // 4. REMOÇÃO FINAL
+                // Artigos/Preposições desnecessárias
+                textoCorrigido = textoCorrigido.replace(/\b(o|a|os|as|um|uma|uns|umas|de|da|do|e|em)\b/g, '').trim();
+
+                // Formatação final
+                textoCorrigido = textoCorrigido.replace(/[.?]/g, '');
+                textoCorrigido = textoCorrigido.replace(/\s+/g, ' ').trim();
+
+                return textoCorrigido.toUpperCase();
+            }
+        }
+    </script>
+    
+</body>
+</html>
