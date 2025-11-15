@@ -1,29 +1,33 @@
-# Tradutor Automático de Áudio/Vídeo para Libras (VLibras) — Tradução Dinâmica
+# Tradutor Automático de Áudio/Vídeo para Libras (VLibras) — Tela Dividida: Tradução Instantânea
 
-Este aplicativo permite captar áudio em tempo real (voz, vídeos, rádio, aulas, etc.) e converter em texto adaptado à estrutura esperada pelo VLibras, realizando a tradução para Libras em **quase tempo real** — ou seja, a cada frase ou trecho reconhecido o VLibras atualiza imediatamente a sinalização do avatar.
+Este aplicativo permite transcrever áudio em tempo real (fala, vídeos, rádio, etc.), adapta a estrutura gramatical automaticamente e apresenta a tradução para Libras **diretamente na mesma tela**, com o avatar VLibras sempre visível ao lado, facilitando o uso tanto em conversas presenciais quanto em situações cotidianas.
 
 ## Principais Funcionalidades
 
-- **Captação de áudio ao vivo:** Fale no microfone ou aproxime vídeos ou outra fonte de som.
-- **Transcrição automática:** O reconhecimento converte o áudio em texto, exibindo-o imediatamente na tela.
-- **Adaptação gramatical para Libras:** O texto é automaticamente preparado para sinalização clara no VLibras.
-- **Envio dinâmico ao VLibras:** Ao iniciar, o VLibras já abre automaticamente e o texto traduzido vai sendo atualizado durante toda a gravação, permitindo acompanhamento em “quase tempo real”.
+- **Captação de áudio ao vivo:** Use o microfone do seu computador ou celular, ou aproxime fontes de áudio.
+- **Transcrição instantânea:** O texto aparece na tela em tempo real.
+- **Adaptação gramatical automática para Libras:** O texto é preparado para uma compreensão ideal pelo avatar VLibras.
+- **Integração embutida com VLibras:** O avatar VLibras aparece ao lado (ou abaixo no celular) e atualiza a tradução automaticamente, sem abrir novas abas.
 - **Botão para copiar o texto adaptado.**
+- **Responsivo:** Experiência fluída tanto em PC quanto em celular.
 
 ## Como Usar
 
 1. Abra o arquivo `app.html` em um navegador moderno (Chrome, Edge, Brave).
 2. Clique em **"Iniciar Microfone"** e fale ou aproxime qualquer fonte de áudio do microfone.
-3. O VLibras será aberto em uma nova aba. Ela será constantemente atualizada a cada frase falada ou ouvida.
-4. Veja o texto adaptado ser exibido na sua tela e o avatar VLibras sinalizando imediatamente.
-5. Use o botão **Copiar Texto Adaptado** para copiar o resultado mais recente, se desejar.
+3. Veja o texto transcrito sendo exibido, já adaptado, na coluna da esquerda.
+4. O avatar VLibras ao lado sinaliza a tradução do texto em Libras automaticamente.
+5. Use o botão **"Copiar Texto Adaptado"** para copiar a última frase traduzida.
+6. Clique em **"Parar"** para encerrar a gravação.
 
-**Dica:** Para captar áudio de vídeos, aproxime o microfone da fonte de som (caixa, TV, celular). Permita que o navegador acesse o microfone!
+**Dica:** Permita que o navegador acesse o microfone. Para captar áudio de vídeos, aproxime a saída de som do microfone.
 
 ## Requisitos
 
-- Navegador compatível com [Web Speech API](https://developer.mozilla.org/pt-BR/docs/Web/API/Web_Speech_API) (Chrome recomendado).
+- Navegador compatível com [Web Speech API](https://developer.mozilla.org/pt-BR/docs/Web/API/Web_Speech_API). (Chrome é o mais indicado.)
 - Permissão para acessar o microfone.
+- Conexão com internet.
+- (Não recomendado em navegadores pouco comuns ou desatualizados.)
 
 ## Estrutura do Projeto
 
@@ -31,16 +35,17 @@ Este aplicativo permite captar áudio em tempo real (voz, vídeos, rádio, aulas
 
 ## Acessibilidade
 
-- Altos contrastes e botões acessíveis por teclado.
-- Integrado ao plugin VLibras para navegação acessível e sinalização em Libras.
+- Interface com contrastes e botões acessíveis.
+- Avatar VLibras já integrado na tela, sem redirecionamento.
+- Controle fácil apenas com teclado/tab.
 
-## Contribua ou Sugira Melhorias!
+## Contribua!
 
-Sugestões, regras gramaticais ou melhorias são bem-vindas! Abra uma issue ou envie um pull request.
+Sugestões para melhoria das regras gramaticais, interface ou integração são bem-vindas! Abra uma issue ou envie um pull request.
 
 ## Licença
 
-MIT — uso livre e adaptável para outras línguas de sinais.
+MIT — uso livre, aberto para adaptações.
 
 ---
-Feito para acessibilidade, comunicação e inclusão. 🤟
+Feito para ampliar a comunicação e a inclusão. 🤟
