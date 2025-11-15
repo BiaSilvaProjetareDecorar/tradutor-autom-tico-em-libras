@@ -16,14 +16,12 @@
     <header>
         <h1>Tradutor Automático de Áudio/Vídeo para Libras</h1>
         <p>
-          Este aplicativo capta áudio <strong>ao vivo</strong>
-          — sua voz ou o som de vídeos/tv/rádio próximos ao microfone —,
-          transcreve para texto, adapta a estrutura gramatical para Libras e envia para o <a href="https://www.vlibras.gov.br" target="_blank" rel="noopener noreferrer">VLibras</a> sinalizar instantaneamente.
+            Este aplicativo escuta sua fala ou de vídeos próximos ao microfone, adapta para Libras e envia em <b>quase tempo real</b> ao <a href="https://www.vlibras.gov.br" target="_blank" rel="noopener noreferrer">VLibras</a>.
         </p>
         <ul>
-            <li><strong>1.</strong> Clique <b>Iniciar Microfone</b> e fale, ou aproxime um vídeo do microfone.</li>
-            <li><strong>2.</strong> O texto adaptado será exibido e abrirá no VLibras, em outra aba, para visualização do avatar.</li>
-            <li><strong>Dica:</strong> Permita o acesso ao microfone no navegador. A captação também pode funcionar aproximando o microfone da saída de som do computador ou celular.</li>
+            <li><b>1.</b> Clique <b>Iniciar Microfone</b> e fale ou aproxime um vídeo do microfone.</li>
+            <li><b>2.</b> O VLibras abre e atualiza automaticamente conforme você fala.</li>
+            <li><b>Dica:</b> Permita o uso do microfone.</li>
         </ul>
     </header>
     <main>
@@ -41,20 +39,12 @@
         <section>
             <div id="saida-texto" aria-live="polite">
                 Clique em "Iniciar Microfone" para começar.<br>
-                <span style="color:#666; font-size:0.98em;">(O áudio será transcrito e enviado para o VLibras automaticamente quando finalizar a fala ou áudio!)</span>
+                <span style="color:#666; font-size:0.98em;">
+                    O áudio será transcrito e enviado automaticamente ao VLibras, que atualizará a cada frase durante a fala.
+                </span>
             </div>
-        </section>
-        <section class="vlibras-box">
-        <div vw class="enabled">
-            <div vw-access-button class="active"></div>
-            <div vw-plugin-wrapper>
-                <div class="vw-plugin-top-wrapper"></div>
-            </div>
-        </div>
         </section>
     </main>
-
-    <script src="https://vlibras.gov.br/app/a006c000003Nf07/plugin.js" async defer></script>
 
     <script>
     // Elementos da interface
@@ -63,14 +53,16 @@
     const pararBtn = document.getElementById('parar');
     const copiarBtn = document.getElementById('copiar');
 
-    // Reconhecimento de fala
+    // SpeechRecognition API
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     let finalTranscript = '';
     let textoAdaptado = '';
+    let vlibrasWin = null;
+    let ultimaFraseEnviada = '';
 
     if (!SpeechRecognition) {
-        saidaTexto.innerText = "ERRO: Seu navegador não suporta reconhecimento de fala (Web Speech API). Experimente Google Chrome.";
+        saidaTexto.innerText = "ERRO: Navegador não suporta reconhecimento de fala (Web Speech API). Chrome recomendado.";
         iniciarBtn.disabled = true;
         pararBtn.disabled = true;
         copiarBtn.style.display = 'none';
@@ -78,6 +70,13 @@
         const recognition = new SpeechRecognition();
         recognition.lang = 'pt-BR';
         recognition.interimResults = true;
+
+        recognition.onstart = () => {
+            // Abre VLibras se não está aberto ou está fechado
+            if (!vlibrasWin || vlibrasWin.closed) {
+                vlibrasWin = window.open("https://www.vlibras.gov.br/tradutor/?query=", "vlibrasLive");
+            }
+        };
 
         recognition.onresult = (event) => {
             let interimTranscript = '';
@@ -90,38 +89,41 @@
                     interimTranscript += transcript;
                 }
             }
-            saidaTexto.innerText = `Original: ${finalTranscript + interimTranscript}`;
+            const textoParaAdaptar = (finalTranscript + interimTranscript).trim();
+            saidaTexto.innerText = `Original: ${textoParaAdaptar}`;
+
+            if (textoParaAdaptar && textoParaAdaptar !== ultimaFraseEnviada) {
+                textoAdaptado = aplicarRegrasDeLibras(textoParaAdaptar);
+                // Atualiza VLibras sempre que há novo texto diferente
+                if (vlibrasWin && !vlibrasWin.closed) {
+                    vlibrasWin.location.href = `https://www.vlibras.gov.br/tradutor/?query=${encodeURIComponent(textoAdaptado)}`;
+                }
+                ultimaFraseEnviada = textoParaAdaptar;
+                copiarBtn.style.display = 'inline-block';
+            }
         };
 
         recognition.onend = () => {
             iniciarBtn.style.backgroundColor = 'green';
             iniciarBtn.innerText = 'Iniciar Microfone';
             pararBtn.disabled = true;
-
-            if (finalTranscript.trim().length > 0) {
-                textoAdaptado = aplicarRegrasDeLibras(finalTranscript.trim());
-                saidaTexto.innerText = `Original: ${finalTranscript}\n\nTradução adaptada para Libras:\n"${textoAdaptado}"`;
-                copiarBtn.style.display = 'inline-block';
-                // Abre VLibras com texto pronto
-                const linkVLibras = `https://www.vlibras.gov.br/tradutor/?query=${encodeURIComponent(textoAdaptado)}`;
-                window.open(linkVLibras, '_blank');
-                saidaTexto.innerText += `\n\n✅ Tradução aberta no VLibras (outra aba).`;
-            } else {
-                copiarBtn.style.display = 'none';
-                saidaTexto.innerText += "\nNada foi captado. Tente novamente!";
-            }
         };
 
         iniciarBtn.addEventListener('click', () => {
             if (typeof recognition.start === 'function') {
                 finalTranscript = '';
                 textoAdaptado = '';
+                ultimaFraseEnviada = '';
                 recognition.start();
                 iniciarBtn.style.backgroundColor = 'orange';
                 iniciarBtn.innerText = 'Gravando...';
                 pararBtn.disabled = false;
-                saidaTexto.innerText = '🔴 Gravando... Fale ou aproxime um vídeo do microfone 🡺';
+                saidaTexto.innerText = '🔴 Gravando... Fale ou aproxime um vídeo do microfone.';
                 copiarBtn.style.display = 'none';
+                // Garante que a aba VLibras será aberta imediatamente
+                if (!vlibrasWin || vlibrasWin.closed) {
+                    vlibrasWin = window.open("https://www.vlibras.gov.br/tradutor/?query=", "vlibrasLive");
+                }
             } else {
                 saidaTexto.innerText = "ERRO: Não foi possível iniciar o microfone!";
             }
