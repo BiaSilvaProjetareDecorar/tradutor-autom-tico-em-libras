@@ -5,207 +5,186 @@
     <title>Tradutor Automático de Áudio/Vídeo para Libras</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.7; background:#fafcff; max-width: 700px; margin: 2em auto;}
-        button { font-size: 18px; padding: 10px; margin-right: 10px; }
-        #saida-texto { border: 1px solid #ccc; background:#f7f7fa; padding: 10px; min-height: 70px; margin-bottom: 2em; }
-        .visually-hidden { position: absolute; left: -9999px; }
-        .vlibras-box { margin-top:28px; margin-bottom: 16px; }
+      body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafcff;}
+      .container { display: flex; flex-wrap: wrap; min-height: 100vh; }
+      .col { flex: 1 1 350px; min-width:320px; max-width: 50vw; box-sizing:border-box; padding:2em 1.5em;}
+      .vlibras-panel { background:#181844; height:72vh; border:none; width:100%; border-radius:16px; }
+      @media (max-width: 900px) {
+        .container { flex-direction: column; }
+        .col { max-width:100vw; }
+        .vlibras-panel { height:340px;}
+      }
+      #saida-texto { border: 1px solid #ccc; background:#f7f7fa; padding: 10px; min-height: 60px; margin-bottom: 2em;}
+      button { font-size:18px; padding:10px; margin-right:10px; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Tradutor Automático de Áudio/Vídeo para Libras</h1>
-        <p>
-            Este aplicativo escuta sua fala ou de vídeos próximos ao microfone, adapta para Libras e envia em <b>quase tempo real</b> ao <a href="https://www.vlibras.gov.br" target="_blank" rel="noopener noreferrer">VLibras</a>.
-        </p>
-        <ul>
-            <li><b>1.</b> Clique <b>Iniciar Microfone</b> e fale ou aproxime um vídeo do microfone.</li>
-            <li><b>2.</b> O VLibras abre e atualiza automaticamente conforme você fala.</li>
-            <li><b>Dica:</b> Permita o uso do microfone.</li>
-        </ul>
-    </header>
-    <main>
-        <label for="iniciar" class="visually-hidden">Botão para iniciar reconhecimento de fala com microfone</label>
-        <label for="parar" class="visually-hidden">Botão para parar o reconhecimento de fala</label>
-        <button id="iniciar" aria-label="Iniciar Microfone" style="background-color: green; color: white;">
-            Iniciar Microfone
-        </button>
-        <button id="parar" aria-label="Parar Microfone" style="background-color: red; color: white;" disabled>
-            Parar
-        </button>
-        <button id="copiar" aria-label="Copiar Texto Adaptado" style="background-color:#222; color:white; display: none;">
-            Copiar Texto Adaptado
-        </button>
-        <section>
-            <div id="saida-texto" aria-live="polite">
-                Clique em "Iniciar Microfone" para começar.<br>
-                <span style="color:#666; font-size:0.98em;">
-                    O áudio será transcrito e enviado automaticamente ao VLibras, que atualizará a cada frase durante a fala.
-                </span>
-            </div>
-        </section>
-    </main>
+  <div class="container">
+    <div class="col">
+      <h1>Tradutor Automático de Áudio/Vídeo para Libras</h1>
+      <ol>
+        <li>Clique em <b>Iniciar Microfone</b> e fale (ou aproxime um vídeo do microfone).</li>
+        <li>Veja o texto adaptado sendo traduzido pelo VLibras ao lado.</li>
+        <li>Botão <i>Copiar Texto Adaptado</i> disponível para compartilhar com outros apps.</li>
+      </ol>
+      <button id="iniciar" aria-label="Iniciar Microfone" style="background-color: green; color: white;">Iniciar Microfone</button>
+      <button id="parar" aria-label="Parar Microfone" style="background-color: red; color: white;" disabled>Parar</button>
+      <button id="copiar" aria-label="Copiar Texto Adaptado" style="background-color:#222; color:white; display:none;">Copiar Texto Adaptado</button>
+      <div id="saida-texto" aria-live="polite">Clique em "Iniciar Microfone" para começar.<br><span style="color:#666; font-size:0.98em;">O áudio será transcrito e enviado ao VLibras ao lado, que atualizará a cada frase.</span></div>
+    </div>
+    <div class="col">
+      <iframe
+        id="vlibras-frame"
+        class="vlibras-panel"
+        src="https://www.vlibras.gov.br/tradutor/?query="
+        title="Avatar VLibras"
+        allow="clipboard-write"
+        ></iframe>
+    </div>
+  </div>
+<script>
+const saidaTexto = document.getElementById('saida-texto');
+const iniciarBtn = document.getElementById('iniciar');
+const pararBtn = document.getElementById('parar');
+const copiarBtn = document.getElementById('copiar');
+const vlibrasFrame = document.getElementById('vlibras-frame');
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    <script>
-    // Elementos da interface
-    const saidaTexto = document.getElementById('saida-texto');
-    const iniciarBtn = document.getElementById('iniciar');
-    const pararBtn = document.getElementById('parar');
-    const copiarBtn = document.getElementById('copiar');
+let finalTranscript = '';
+let textoAdaptado = '';
+let ultimaFraseEnviada = '';
 
-    // SpeechRecognition API
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (!SpeechRecognition) {
+    saidaTexto.innerText = "ERRO: Seu navegador não suporta reconhecimento de fala (Web Speech API).";
+    iniciarBtn.disabled = true;
+    pararBtn.disabled = true;
+    copiarBtn.style.display = 'none';
+} else {
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'pt-BR';
+    recognition.interimResults = true;
 
-    let finalTranscript = '';
-    let textoAdaptado = '';
-    let vlibrasWin = null;
-    let ultimaFraseEnviada = '';
+    recognition.onresult = (event) => {
+        let interimTranscript = '';
+        finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                finalTranscript += transcript + " ";
+            } else {
+                interimTranscript += transcript;
+            }
+        }
+        const textoParaAdaptar = (finalTranscript + interimTranscript).trim();
+        saidaTexto.innerText = `Original: ${textoParaAdaptar}`;
 
-    if (!SpeechRecognition) {
-        saidaTexto.innerText = "ERRO: Navegador não suporta reconhecimento de fala (Web Speech API). Chrome recomendado.";
-        iniciarBtn.disabled = true;
+        if (textoParaAdaptar && textoParaAdaptar !== ultimaFraseEnviada) {
+            textoAdaptado = aplicarRegrasDeLibras(textoParaAdaptar);
+            // Embute a tradução ao iframe VLibras
+            vlibrasFrame.src = "https://www.vlibras.gov.br/tradutor/?query=" + encodeURIComponent(textoAdaptado);
+            ultimaFraseEnviada = textoParaAdaptar;
+            copiarBtn.style.display = 'inline-block';
+        }
+    };
+
+    recognition.onend = () => {
+        iniciarBtn.style.backgroundColor = 'green';
+        iniciarBtn.innerText = 'Iniciar Microfone';
+        pararBtn.disabled = true;
+    };
+
+    iniciarBtn.addEventListener('click', () => {
+        if (typeof recognition.start === 'function') {
+            finalTranscript = '';
+            textoAdaptado = '';
+            ultimaFraseEnviada = '';
+            recognition.start();
+            iniciarBtn.style.backgroundColor = 'orange';
+            iniciarBtn.innerText = 'Gravando...';
+            pararBtn.disabled = false;
+            saidaTexto.innerText = '🔴 Gravando... Fale ou aproxime um vídeo do microfone.';
+            copiarBtn.style.display = 'none';
+        } else {
+            saidaTexto.innerText = "ERRO: Não foi possível iniciar o microfone!";
+        }
+    });
+
+    pararBtn.addEventListener('click', () => {
+        recognition.stop();
+        iniciarBtn.style.backgroundColor = 'green';
+        iniciarBtn.innerText = 'Iniciar Microfone';
+        pararBtn.disabled = true;
+    });
+
+    recognition.onerror = (event) => {
+        let msg = '';
+        if (event.error === 'not-allowed') {
+            msg = "ERRO: Permissão ao microfone negada. Permita o uso nas configurações do navegador.";
+        } else if (event.error === 'no-speech') {
+            msg = "Nenhuma fala foi detectada. Tente falar de novo.";
+        } else {
+            msg = `Erro de transcrição: ${event.error}`;
+        }
+        saidaTexto.innerText = msg;
+        iniciarBtn.style.backgroundColor = 'green';
+        iniciarBtn.innerText = 'Iniciar Microfone';
         pararBtn.disabled = true;
         copiarBtn.style.display = 'none';
-    } else {
-        const recognition = new SpeechRecognition();
-        recognition.lang = 'pt-BR';
-        recognition.interimResults = true;
+    };
 
-        recognition.onstart = () => {
-            // Abre VLibras se não está aberto ou está fechado
-            if (!vlibrasWin || vlibrasWin.closed) {
-                vlibrasWin = window.open("https://www.vlibras.gov.br/tradutor/?query=", "vlibrasLive");
-            }
-        };
+    copiarBtn.addEventListener('click', () => {
+        if (textoAdaptado) {
+            navigator.clipboard.writeText(textoAdaptado)
+                .then(() => {
+                    copiarBtn.innerText = 'Copiado!';
+                    setTimeout(() => { copiarBtn.innerText = 'Copiar Texto Adaptado'; }, 1600);
+                });
+        }
+    });
+}
 
-        recognition.onresult = (event) => {
-            let interimTranscript = '';
-            finalTranscript = '';
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const transcript = event.results[i][0].transcript;
-                if (event.results[i].isFinal) {
-                    finalTranscript += transcript + ' ';
-                } else {
-                    interimTranscript += transcript;
-                }
-            }
-            const textoParaAdaptar = (finalTranscript + interimTranscript).trim();
-            saidaTexto.innerText = `Original: ${textoParaAdaptar}`;
+// Regras simples de estrutura para Libras
+function aplicarRegrasDeLibras(textoOriginal) {
+    let textoCorrigido = textoOriginal.toLowerCase();
+    textoCorrigido = textoCorrigido.replace(/\btá bom\b/g, 'ok')
+                                   .replace(/\ba gente\b/g, 'nós')
+                                   .replace(/\bmeu\b/g, 'eu')
+                                   .replace(/\bminha\b/g, 'eu')
+                                   .replace(/\bobrigado\b/g, 'obrigado')
+                                   .replace(/\bnao\b/g, 'não')
+                                   .replace(/\bcomprei\b/g, 'comprar')
+                                   .replace(/\bfui\b/g, 'ir')
+                                   .replace(/\bgosta\b/g, 'gostar')
+                                   .replace(/\bvai\b/g, 'ir')
+                                   .replace(/\bvá\b/g, 'ir')
+                                   .replace(/\b(é|está|estou|somos|estar)\b/g, '');
 
-            if (textoParaAdaptar && textoParaAdaptar !== ultimaFraseEnviada) {
-                textoAdaptado = aplicarRegrasDeLibras(textoParaAdaptar);
-                // Atualiza VLibras sempre que há novo texto diferente
-                if (vlibrasWin && !vlibrasWin.closed) {
-                    vlibrasWin.location.href = `https://www.vlibras.gov.br/tradutor/?query=${encodeURIComponent(textoAdaptado)}`;
-                }
-                ultimaFraseEnviada = textoParaAdaptar;
-                copiarBtn.style.display = 'inline-block';
-            }
-        };
-
-        recognition.onend = () => {
-            iniciarBtn.style.backgroundColor = 'green';
-            iniciarBtn.innerText = 'Iniciar Microfone';
-            pararBtn.disabled = true;
-        };
-
-        iniciarBtn.addEventListener('click', () => {
-            if (typeof recognition.start === 'function') {
-                finalTranscript = '';
-                textoAdaptado = '';
-                ultimaFraseEnviada = '';
-                recognition.start();
-                iniciarBtn.style.backgroundColor = 'orange';
-                iniciarBtn.innerText = 'Gravando...';
-                pararBtn.disabled = false;
-                saidaTexto.innerText = '🔴 Gravando... Fale ou aproxime um vídeo do microfone.';
-                copiarBtn.style.display = 'none';
-                // Garante que a aba VLibras será aberta imediatamente
-                if (!vlibrasWin || vlibrasWin.closed) {
-                    vlibrasWin = window.open("https://www.vlibras.gov.br/tradutor/?query=", "vlibrasLive");
-                }
-            } else {
-                saidaTexto.innerText = "ERRO: Não foi possível iniciar o microfone!";
-            }
-        });
-
-        pararBtn.addEventListener('click', () => {
-            recognition.stop();
-            iniciarBtn.style.backgroundColor = 'green';
-            iniciarBtn.innerText = 'Iniciar Microfone';
-            pararBtn.disabled = true;
-        });
-
-        recognition.onerror = (event) => {
-            let msg = '';
-            if (event.error === 'not-allowed') {
-                msg = "ERRO: Permissão ao microfone negada. Permita o uso nas configurações do navegador.";
-            } else if (event.error === 'no-speech') {
-                msg = "Nenhuma fala foi detectada. Tente falar de novo.";
-            } else {
-                msg = `Erro de transcrição: ${event.error}`;
-            }
-            saidaTexto.innerText = msg;
-            iniciarBtn.style.backgroundColor = 'green';
-            iniciarBtn.innerText = 'Iniciar Microfone';
-            pararBtn.disabled = true;
-            copiarBtn.style.display = 'none';
-        };
-
-        copiarBtn.addEventListener('click', () => {
-            if (textoAdaptado) {
-                navigator.clipboard.writeText(textoAdaptado)
-                    .then(() => {
-                        copiarBtn.innerText = 'Copiado!';
-                        setTimeout(() => { copiarBtn.innerText = 'Copiar Texto Adaptado'; }, 1600);
-                    });
-            }
-        });
+    // Advérbio de tempo no início
+    if (textoCorrigido.includes('amanhã')) {
+        textoCorrigido = textoCorrigido.replace('amanhã', '').trim();
+        textoCorrigido = 'amanhã ' + textoCorrigido;
     }
-
-    // FUNÇÃO DE ADAPTAÇÃO PARA LIBRAS (pode ser expandida!)
-    function aplicarRegrasDeLibras(textoOriginal) {
-        let textoCorrigido = textoOriginal.toLowerCase();
-        textoCorrigido = textoCorrigido.replace(/\btá bom\b/g, 'ok')
-                                       .replace(/\ba gente\b/g, 'nós')
-                                       .replace(/\bmeu\b/g, 'eu')
-                                       .replace(/\bminha\b/g, 'eu')
-                                       .replace(/\bobrigado\b/g, 'obrigado')
-                                       .replace(/\bnao\b/g, 'não')
-                                       .replace(/\bcomprei\b/g, 'comprar')
-                                       .replace(/\bfui\b/g, 'ir')
-                                       .replace(/\bgosta\b/g, 'gostar')
-                                       .replace(/\bvai\b/g, 'ir')
-                                       .replace(/\bvá\b/g, 'ir')
-                                       .replace(/\b(é|está|estou|somos|estar)\b/g, '');
-
-        // Coloca advérbios de tempo no início (simples)
-        if (textoCorrigido.includes('amanhã')) {
-            textoCorrigido = textoCorrigido.replace('amanhã', '').trim();
-            textoCorrigido = 'amanhã ' + textoCorrigido;
-        }
-        if (textoCorrigido.includes('ontem')) {
-            textoCorrigido = textoCorrigido.replace('ontem', '').trim();
-            textoCorrigido = 'ontem ' + textoCorrigido;
-        }
-        // Negação no final
-        if (textoCorrigido.includes(' não ')) {
-            textoCorrigido = textoCorrigido.replace(' não ', ' ');
-            textoCorrigido = textoCorrigido.trim() + ' NÃO';
-        }
-        // Verbo IR para o final
-        if (textoCorrigido.includes(' ir ')) {
-            let partes = textoCorrigido.split(' ');
-            partes = partes.filter(p => p !== 'ir');
-            textoCorrigido = partes.join(' ') + ' IR';
-        }
-        // Remove artigos/preposições/pontuação comum
-        textoCorrigido = textoCorrigido.replace(/\b(o|a|à|os|as|um|uma|uns|umas|de|da|do|e|em|por)\b/g, '').trim();
-        textoCorrigido = textoCorrigido.replace(/[.!?]/g, '');
-        textoCorrigido = textoCorrigido.replace(/\s+/g, ' ').trim();
-
-        return textoCorrigido.toUpperCase();
+    if (textoCorrigido.includes('ontem')) {
+        textoCorrigido = textoCorrigido.replace('ontem', '').trim();
+        textoCorrigido = 'ontem ' + textoCorrigido;
     }
-    </script>
+    // Negação ao final
+    if (textoCorrigido.includes(' não ')) {
+        textoCorrigido = textoCorrigido.replace(' não ', ' ');
+        textoCorrigido = textoCorrigido.trim() + ' NÃO';
+    }
+    // IR ao final
+    if (textoCorrigido.includes(' ir ')) {
+        let partes = textoCorrigido.split(' ');
+        partes = partes.filter(p => p !== 'ir');
+        textoCorrigido = partes.join(' ') + ' IR';
+    }
+    // Remove artigos/preposições/pontuação
+    textoCorrigido = textoCorrigido.replace(/\b(o|a|à|os|as|um|uma|uns|umas|de|da|do|e|em|por)\b/g, '').trim();
+    textoCorrigido = textoCorrigido.replace(/[.!?]/g, '');
+    textoCorrigido = textoCorrigido.replace(/\s+/g, ' ').trim();
+    return textoCorrigido.toUpperCase();
+}
+</script>
 </body>
 </html>
