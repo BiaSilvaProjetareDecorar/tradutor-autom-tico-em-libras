@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Tradutor Automático de Áudio/Vídeo para Libras</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="img/icon-192.png" sizes="192x192" type="image/png">
+</head>
+<body>
+  <header>
+    <h1>Tradutor Automático de Áudio/Vídeo para Libras</h1>
+    <button id="btn-darkmode" title="Alternar modo escuro">🌗</button>
+  </header>
+  <main>
+    <section id="instructions">
+      <ol>
+        <li>Clique <b>Iniciar Microfone</b> e fale (ou aproxime um vídeo/áudio do microfone).</li>
+        <li>O texto adaptado aparecerá e será enviado ao VLibras automaticamente.</li>
+        <li>Use o histórico para consultar frases anteriores ou exportar.</li>
+      </ol>
+    </section>
+    <section id="controls">
+      <button id="iniciar" aria-label="Iniciar Microfone" class="main-btn">Iniciar Microfone</button>
+      <button id="parar" aria-label="Parar Microfone" class="main-btn" disabled>Parar</button>
+      <button id="upload-audio" class="main-btn">Enviar Áudio (.wav/.mp3)</button>
+      <input type="file" id="audio-file" accept="audio/*" style="display:none" />
+    </section>
+    <section id="saida-container">
+      <div id="saida-texto" aria-live="polite">
+        Clique em "Iniciar Microfone" para começar.<br>
+        <span class="descricao">Após a fala, a tradução abrirá automaticamente no VLibras (nova aba)!</span>
+      </div>
+      <button id="export-txt" style="display:none" class="aux-btn">Exportar .TXT</button>
+      <button id="export-pdf" style="display:none" class="aux-btn">Exportar PDF</button>
+      <button id="whatsapp" style="display:none" class="aux-btn">Enviar WhatsApp</button>
+    </section>
+    <section>
+      <h2>Histórico</h2>
+      <ul id="historico"></ul>
+    </section>
+    <div id="pop-manual" class="modal" aria-modal="true" style="display:none;">
+        <div class="modal-content">
+            <span id="close-manual" class="close">&times;</span>
+            <h2>Como usar</h2>
+            <img src="img/manual.png" alt="Passo a passo visual" style="max-width:90%;">
+            <p>1. Permita o microfone.<br>
+            2. Inicie a gravação.<br>
+            3. Veja e utilize o texto adaptado!<br>
+            4. Consulte o histórico ou exporte quando quiser.</p>
+        </div>
+    </div>
+    <button id="show-manual" class="aux-btn">Ajuda/Manual 📖</button>
+  </main>
+  <script src="app.js"></script>
+  <script>
+    // Instalação rápida como PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+</body>
+</html>
