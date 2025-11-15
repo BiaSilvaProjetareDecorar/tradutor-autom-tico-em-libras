@@ -1,51 +1,38 @@
-# Tradutor Automático de Áudio/Vídeo para Libras (VLibras) — Tela Dividida: Tradução Instantânea
+# Tradutor Automático de Áudio/Vídeo para Libras (VLibras) — Tela Dividida
 
-Este aplicativo permite transcrever áudio em tempo real (fala, vídeos, rádio, etc.), adapta a estrutura gramatical automaticamente e apresenta a tradução para Libras **diretamente na mesma tela**, com o avatar VLibras sempre visível ao lado, facilitando o uso tanto em conversas presenciais quanto em situações cotidianas.
+Este aplicativo transcreve áudio em tempo real (fala, vídeos, rádio, etc.), adapta a estrutura para Libras automaticamente e apresenta a tradução pelo avatar VLibras **diretamente na mesma tela**, sem abrir novas abas. É ideal para pessoas surdas utilizarem em conversas – basta abrir no navegador do celular ou computador.
 
-## Principais Funcionalidades
+## Funcionalidades
 
-- **Captação de áudio ao vivo:** Use o microfone do seu computador ou celular, ou aproxime fontes de áudio.
-- **Transcrição instantânea:** O texto aparece na tela em tempo real.
-- **Adaptação gramatical automática para Libras:** O texto é preparado para uma compreensão ideal pelo avatar VLibras.
-- **Integração embutida com VLibras:** O avatar VLibras aparece ao lado (ou abaixo no celular) e atualiza a tradução automaticamente, sem abrir novas abas.
-- **Botão para copiar o texto adaptado.**
-- **Responsivo:** Experiência fluída tanto em PC quanto em celular.
+- **Captação de áudio ao vivo:** use o microfone do celular/computador, fale ou aproxime fontes de áudio.
+- **Transcrição instantânea:** texto aparece na tela em tempo real.
+- **Adaptação gramatical para Libras:** regras automáticas para frasear melhor no VLibras.
+- **Avatar VLibras embutido:** tradução é apresentada instantaneamente, lado a lado.
+- **Botão para copiar texto adaptado.**
+- **Layout responsivo:** funciona bem no desktop e no celular.
 
-## Como Usar
+## Como usar
 
-1. Abra o arquivo `app.html` em um navegador moderno (Chrome, Edge, Brave).
-2. Clique em **"Iniciar Microfone"** e fale ou aproxime qualquer fonte de áudio do microfone.
-3. Veja o texto transcrito sendo exibido, já adaptado, na coluna da esquerda.
-4. O avatar VLibras ao lado sinaliza a tradução do texto em Libras automaticamente.
-5. Use o botão **"Copiar Texto Adaptado"** para copiar a última frase traduzida.
-6. Clique em **"Parar"** para encerrar a gravação.
+1. Abra o arquivo `app.html` em um navegador moderno (Chrome recomendado, Edge ou Brave também funcionam bem).
+2. Clique em **"Iniciar Microfone"** e fale ou aproxime a fonte de áudio.
+3. O texto aparece na tela, já adaptado, e o avatar VLibras ao lado sinaliza a tradução automaticamente.
+4. Use **"Copiar Texto Adaptado"** se quiser colar o texto em outro lugar.
+5. Clique em **"Parar"** para encerrar a captação de áudio.
 
-**Dica:** Permita que o navegador acesse o microfone. Para captar áudio de vídeos, aproxime a saída de som do microfone.
+**Dica:** Permita o uso do microfone no navegador. Para usado com vídeos, aproxime o microfone da fonte de som.
 
 ## Requisitos
 
-- Navegador compatível com [Web Speech API](https://developer.mozilla.org/pt-BR/docs/Web/API/Web_Speech_API). (Chrome é o mais indicado.)
-- Permissão para acessar o microfone.
-- Conexão com internet.
-- (Não recomendado em navegadores pouco comuns ou desatualizados.)
+- Navegador compatível com [Web Speech API](https://developer.mozilla.org/pt-BR/docs/Web/API/Web_Speech_API) – Chrome é o mais indicado.
+- Permitir o uso do microfone.
+- Conexão à internet.
 
 ## Estrutura do Projeto
 
-- `app.html` — Aplicativo principal, pronto para uso direto.
+- `app.html` — Aplicativo principal.
 
 ## Acessibilidade
 
-- Interface com contrastes e botões acessíveis.
-- Avatar VLibras já integrado na tela, sem redirecionamento.
-- Controle fácil apenas com teclado/tab.
-
-## Contribua!
-
-Sugestões para melhoria das regras gramaticais, interface ou integração são bem-vindas! Abra uma issue ou envie um pull request.
-
-## Licença
-
-MIT — uso livre, aberto para adaptações.
-
----
-Feito para ampliar a comunicação e a inclusão. 🤟
+- Interface com alto contraste e botões grandes.
+- Avatar VLibras sempre visível.
+- Controle por teclado
