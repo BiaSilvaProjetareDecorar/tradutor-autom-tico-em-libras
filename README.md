@@ -1,25 +1,23 @@
-# Tradutor Automático de Áudio/Vídeo para Libras (VLibras) — Tela Dividida
+# Tradutor Automático de Áudio/Vídeo para Libras (VLibras) — Envio Automático
 
-Este aplicativo transcreve áudio em tempo real (fala, vídeos, rádio, etc.), adapta a estrutura para Libras automaticamente e apresenta a tradução pelo avatar VLibras **diretamente na mesma tela**, sem abrir novas abas. É ideal para pessoas surdas utilizarem em conversas – basta abrir no navegador do celular ou computador.
+Este aplicativo transcreve áudio em tempo real (fala, vídeos, rádio, etc.), adapta a estrutura para Libras automaticamente e já envia o texto traduzido ao VLibras **automaticamente**, numa aba/janela sempre atualizada, sem exigir cópia ou comando manual do usuário.
 
-## Funcionalidades
+## Principais Funcionalidades
 
 - **Captação de áudio ao vivo:** use o microfone do celular/computador, fale ou aproxime fontes de áudio.
 - **Transcrição instantânea:** texto aparece na tela em tempo real.
-- **Adaptação gramatical para Libras:** regras automáticas para frasear melhor no VLibras.
-- **Avatar VLibras embutido:** tradução é apresentada instantaneamente, lado a lado.
-- **Botão para copiar texto adaptado.**
-- **Layout responsivo:** funciona bem no desktop e no celular.
+- **Adaptação gramatical para Libras:** regras automáticas para uma melhor sinalização no VLibras.
+- **Envio automático ao VLibras:** a cada frase ou trecho reconhecido, a tradução adaptada é aberta ou atualizada no VLibras automaticamente, sem pedir ação manual.
+- **Layout simples e acessível:** funciona bem no desktop e no celular.
 
 ## Como usar
 
-1. Abra o arquivo `app.html` em um navegador moderno (Chrome recomendado, Edge ou Brave também funcionam bem).
+1. Abra o arquivo `app.html` em um navegador moderno (Chrome recomendado, Edge ou Brave também).
 2. Clique em **"Iniciar Microfone"** e fale ou aproxime a fonte de áudio.
-3. O texto aparece na tela, já adaptado, e o avatar VLibras ao lado sinaliza a tradução automaticamente.
-4. Use **"Copiar Texto Adaptado"** se quiser colar o texto em outro lugar.
-5. Clique em **"Parar"** para encerrar a captação de áudio.
+3. O texto aparece na tela, já adaptado, e a aba/janela do VLibras abrirá ou será atualizada automaticamente para sinalizar a tradução.
+4. Repita e use “Parar” para finalizar.
 
-**Dica:** Permita o uso do microfone no navegador. Para usado com vídeos, aproxime o microfone da fonte de som.
+**Dica:** Permita o uso do microfone no navegador. Para usar com vídeos, aproxime o microfone da fonte de som.
 
 ## Requisitos
 
@@ -34,5 +32,16 @@ Este aplicativo transcreve áudio em tempo real (fala, vídeos, rádio, etc.), a
 ## Acessibilidade
 
 - Interface com alto contraste e botões grandes.
-- Avatar VLibras sempre visível.
-- Controle por teclado
+- Nenhuma ação manual extra para envio ao VLibras.
+- Totalmente controlável por teclado/tab.
+
+## Contribua!
+
+Sugestões para melhoria das regras, interface ou integração são bem-vindas. Abra uma issue ou envie um pull request.
+
+## Licença
+
+MIT — aberto para uso e personalização.
+
+---
+Feito para inclusão e comunicação acessível! 🤟
