@@ -1,41 +1,43 @@
-# Tradutor Automático de Áudio/Vídeo para Libras (Integração com VLibras)
+# Tradutor Automático de Áudio/Vídeo para Libras (VLibras)
 
-Este projeto é um aplicativo que capta áudios em tempo real (conversa, vídeos, etc.), transcreve para texto em português, adapta automaticamente a estrutura gramatical para Libras e envia esse texto diretamente para o VLibras, facilitando a comunicação e acessibilidade de pessoas surdas.
+Este aplicativo capta áudio em tempo real (voz ao vivo, vídeos próximos ao microfone/computador) e converte para texto adaptado à gramática da Libras. O texto adaptado é enviado automaticamente ao VLibras, permitindo que a tradução para sinais ocorra de forma instantânea e visual.
 
 ## Principais Funcionalidades
 
-- **Captação de Áudio em tempo real:** Use o microfone do navegador para captar falas, vídeos ou outros sons.
-- **Transcrição Inteligente:** O áudio é convertido em texto em português.
-- **Adaptação de estrutura-Libras:** Aplica regras automáticas para ajustar o texto à gramática visual da Língua Brasileira de Sinais.
-- **Integração direta com VLibras:** Abre automaticamente o tradutor VLibras, exibindo o avatar que sinaliza o texto adaptado.
-- **Fácil de usar:** Basta um clique para começar a captar o áudio!
+- **Captação de áudio ao vivo:** Com um clique, o microfone ouve sua fala ou o som de vídeos, transcrevendo em tempo real.
+- **Adaptação automática do texto para Libras:** Aplica regras para transformar o texto no formato que a comunidade surda reconhece e o VLibras interpreta melhor.
+- **Envio e visualização instantânea via VLibras:** Após adaptar o texto, o app abre uma nova aba com o VLibras sinalizando o conteúdo convertido.
 
 ## Como Usar
 
-1. Abra o `app.html` em um navegador moderno (Google Chrome, Edge, Brave ou Firefox com suporte à Reconhecimento de Fala).
-2. Clique em **"Iniciar Microfone"** e comece a falar ou aproxime o microfone do áudio de um vídeo.
-3. O sistema mostra o texto original e, ao terminar, adapta e envia o texto para o VLibras, abrindo em uma nova aba.
-4. Veja o avatar VLibras sinalizando o que foi falado!
+1. Abra o arquivo `app.html` em um navegador moderno (com suporte Web Speech API, como Chrome).
+2. Clique em "Iniciar Microfone". Fale normalmente próximo ao microfone **ou** aproxime fontes de áudio, como vídeos.
+3. O texto transcrito e adaptado será exibido na tela. Assim que finalizado, abrirá uma nova aba no VLibras, que irá sinalizar em libras.
+4. Feche a aba do VLibras e repita o processo quando desejar!
 
-## Requisitos
+> **Recomendação:** Use microfones próximos à fonte de áudio e, para vídeos do próprio computador, prefira caixas de som próximas ao microfone ou use softwares para transmissão do som do sistema.
 
-- Navegador com suporte a [Web Speech API](https://developer.mozilla.org/pt-BR/docs/Web/API/Web_Speech_API).
-- Permissão para uso do microfone.
+## Compatibilidade & Pré-Requisitos
+
+- **Navegador compatível com o Reconhecimento de Fala (Web Speech API).**
+- **Permissão de acesso ao microfone.**
+- Recomenda-se Google Chrome para melhor experiência.
 
 ## Estrutura do Projeto
 
-- `frontend/` — Aplicação React + Vite (opcional, evolução).
-- `backend/` — API Node.js (Fastify) em TypeScript (opcional para uso avançado ou integração).
-- `app.html` — Aplicativo simples, leve e funcional para uso direto pelo navegador.
+- `app.html` — Aplicativo prático, pronto para uso, integração total com o VLibras Web.
+- `frontend/` — (Futuro) Aplicativo React+Vite para expansão.
+- `backend/` — (Opcional) API Node.js (Fastify) em TypeScript para lógica avançada, uso corporativo ou integração.
 
-## Acessibilidade e Sugestões
+## Sugestões e Suporte
 
-- Compatível com leitor de tela.
-- Código aberto para evolução.
-- Sugestões de melhoria são bem-vindas!
+- Para erros, dúvidas ou sugestões, [abra uma issue](https://github.com/BiaSilvaProjetareDecorar/tradutor-autom-tico-em-libras/issues).
+- O projeto é aberto a contribuições; evolua as regras ou adapte para outras línguas de sinais!
 
-## Suporte
+## Licença
 
-Em caso de dúvidas, problemas ou sugestões, [abra uma issue](https://github.com/BiaSilvaProjetareDecorar/tradutor-autom-tico-em-libras/issues) ou compartilhe sua experiência por aqui.
+[MIT, livre para uso e adaptação.]
 
 ---
+
+Feito por apaixonados por acessibilidade! 🤟
