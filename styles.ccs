@@ -1,0 +1,30 @@
+:root {
+  --main-bg: #fafcff;
+  --main-color: #222;
+  --sec-bg: #f7f7fa;
+  --accent: #181844;
+  --error: #b22222;
+}
+
+body { font-family: Arial, sans-serif; background: var(--main-bg); color: var(--main-color); max-width: 750px; margin: 2em auto; }
+header { display: flex; align-items: center; justify-content: space-between; }
+.main-btn { padding: 12px 18px; margin: 5px; font-size: 1.05em; border-radius: 8px; border:none; cursor:pointer; }
+.aux-btn { background:#eee; border:1px solid #ccc; padding:6px 13px; margin: 4px; border-radius: 6px; cursor:pointer; }
+#saida-texto { border: 1px solid #ccc; background: var(--sec-bg); padding: 12px; min-height: 65px; margin-bottom: 1em; margin-top:.5em; border-radius:4px; }
+#historico { font-size: .97em; margin: 1em 0 2em 1em; }
+#historico li { background:#ededed; margin-bottom:8px; padding:6px 9px; border-radius:6px;}
+#btn-darkmode { float: right; font-size:1.4em; background:none; border:none; cursor:pointer; }
+@media (max-width:600px) {
+  body { margin:.8em 2vw;}
+  main, header { font-size: 1em; }
+}
+body.dark { --main-bg:#19191d; --main-color:#fafcff; --sec-bg:#191933; background:#1a1a1f;}
+body.dark #saida-texto { background:#191933; color:#fafcff;}
+body.dark .main-btn { background:#222; color: #fafcff; }
+body.dark .aux-btn { background:#272753; color: #fafcff; }
+body.dark #historico li { background:#2d2e4c; color:#fafcff;}
+/* Modal */
+.modal { display:none; position:fixed; z-index:999; left:0;top:0;width:100vw;height:100vh;overflow:auto;background:rgba(0,0,0,.3);}
+.modal-content {background:#fff;padding:22px;border-radius:10px;max-width:400px;margin:8vh auto; position:relative;}
+.close { position:absolute;right:16px;top:12px;font-size:1.6em;cursor:pointer;}
+body.dark .modal-content {background: #23223a; color: #fafcff;}
